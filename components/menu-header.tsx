@@ -3,8 +3,8 @@
 import Image from "next/image"
 import { useState } from "react"
 import { MapPin, Instagram, Wallet, X, Store } from "lucide-react"
-import { LoyaltyWallet } from "./BotaCard"
-import { WholesaleModal } from "./WholesaleModal" // Asegúrate de tener este archivo creado
+import { LoyaltyWallet } from "./loyalty-wallet"
+import { WholesaleModal } from "./WholesaleModal" // Crearemos este nuevo componente
 
 export function MenuHeader() {
   const [isWalletOpen, setIsWalletOpen] = useState(false)
@@ -13,19 +13,18 @@ export function MenuHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-zinc-950/90 py-4 text-center backdrop-blur-2xl">
-        {/* --- CAMBIO AQUÍ: BOTÓN SUPERIOR DE MAYOREO CORREGIDO --- */}
-        <div className="absolute top-3 right-5 z-[60]">
+        {/* BOTÓN SUPERIOR DE MAYOREO */}
+        <div className="absolute top-2 right-4">
           <button
             onClick={() => setIsWholesaleOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[11px] font-black tracking-widest text-zinc-300 hover:bg-white/10 hover:text-orange-400 transition-all active:scale-95 shadow-lg"
+            className="flex items-center gap-1 text-[9px] font-black text-zinc-500 hover:text-orange-500 transition-colors uppercase tracking-widest"
           >
-            {/* El icono también creció un poquito */}
-            <Store className="h-3.5 w-3.5" />
-            <span>Distribuidor / Mayoreo</span>
+            <Store className="h-3 w-3" />
+            Distribuidor / Mayoreo
           </button>
         </div>
 
-        <div className="container mx-auto px-4 mt-6"> {/* Subimos mt-4 a mt-6 para dar espacio al nuevo botón */}
+        <div className="container mx-auto px-4 mt-4">
           <div className="flex flex-col items-center gap-6">
             <div className="flex justify-center transition-transform duration-500 hover:scale-105">
               <Image
