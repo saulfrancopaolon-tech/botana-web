@@ -2,9 +2,9 @@
 
 import Image from "next/image"
 import { useState } from "react"
-import { MapPin, Instagram, Wallet, X, Store } from "lucide-react"
+import { MapPin, Instagram, Wallet, Store } from "lucide-react"
 import { LoyaltyWallet } from "./loyalty-wallet"
-import { WholesaleModal } from "./WholesaleModal" // Crearemos este nuevo componente
+import { WholesaleModal } from "./WholesaleModal"
 
 export function MenuHeader() {
   const [isWalletOpen, setIsWalletOpen] = useState(false)
@@ -13,18 +13,26 @@ export function MenuHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-zinc-950/90 py-4 text-center backdrop-blur-2xl">
-        {/* BOTÓN SUPERIOR DE MAYOREO */}
-        <div className="absolute top-2 right-4">
+        
+        {/* BOTÓN SUPERIOR DE MAYOREO RE-DISEÑADO */}
+        <div className="absolute top-3 right-4">
           <button
             onClick={() => setIsWholesaleOpen(true)}
-            className="flex items-center gap-1 text-[9px] font-black text-zinc-500 hover:text-orange-500 transition-colors uppercase tracking-widest"
+            className="group relative flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/30 px-3 py-1.5 text-[9px] font-black text-orange-500 hover:bg-orange-500 hover:text-white transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(249,115,22,0.1)] active:scale-95"
           >
+            {/* Punto de notificación animado */}
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+            </span>
+            
             <Store className="h-3 w-3" />
-            Distribuidor / Mayoreo
+            <span className="hidden sm:inline">Distribuidor / Mayoreo</span>
+            <span className="sm:hidden">Mayoreo</span>
           </button>
         </div>
 
-        <div className="container mx-auto px-4 mt-4">
+        <div className="container mx-auto px-4 mt-6">
           <div className="flex flex-col items-center gap-6">
             <div className="flex justify-center transition-transform duration-500 hover:scale-105">
               <Image
@@ -46,11 +54,11 @@ export function MenuHeader() {
               </p>
 
               <div className="flex gap-3">
-                <a href="https://instagram.com/bota.na.mx" target="_blank" className="group flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[11px] font-black tracking-widest text-white hover:bg-white/10 transition-all">
+                <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[11px] font-black tracking-widest text-white hover:bg-white/10 transition-all">
                   <Instagram className="h-3.5 w-3.5" />
                   <span>INSTAGRAM</span>
                 </a>
-                <button onClick={() => setIsWalletOpen(true)} className="group flex items-center gap-2 rounded-full bg-linear-to-tr from-orange-500 to-red-600 px-4 py-2 text-[11px] font-black tracking-widest text-white shadow-lg active:scale-95 transition-all">
+                <button onClick={() => setIsWalletOpen(true)} className="group flex items-center gap-2 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 px-4 py-2 text-[11px] font-black tracking-widest text-white shadow-lg active:scale-95 transition-all">
                   <Wallet className="h-3.5 w-3.5 text-white" />
                   <span>MI TARJETA</span>
                 </button>
