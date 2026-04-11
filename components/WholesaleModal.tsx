@@ -6,11 +6,12 @@ export function WholesaleModal({ isOpen, onClose }: { isOpen: boolean, onClose: 
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-      {/* Fondo oscuro para cerrar si pican afuera */}
+      {/* Fondo oscuro con desenfoque */}
       <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
 
       <div className="relative w-full max-w-lg bg-zinc-900 border border-white/10 rounded-[2rem] p-6 sm:p-8 overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
 
+        {/* Botón Cerrar */}
         <button
           onClick={onClose}
           className="absolute right-4 top-4 sm:right-6 sm:top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-all"
@@ -30,12 +31,9 @@ export function WholesaleModal({ isOpen, onClose }: { isOpen: boolean, onClose: 
               <h3 className="font-black text-white uppercase tracking-widest text-base sm:text-lg">Venta de Mayoreo</h3>
             </div>
             <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
-              Ideal para fiestas, eventos o mesas de snacks. Descuento automático a partir de 20 piezas.
+              Ideal para fiestas, eventos o mesas de snacks. Para conocer nuestros precios de mayoreo y cotizar tu pedido, ponte en contacto con nosotros.
             </p>
 
-      
-
-            {/* NUEVO BOTÓN CONTACTO MAYOREO */}
             <a
               href="https://wa.me/524774950232?text=Hola!%20Me%20interesa%20pedir%20información%20sobre%20MAYOREO%20para%20un%20evento%20con%20BOTA-NA"
               target="_blank"
@@ -53,7 +51,7 @@ export function WholesaleModal({ isOpen, onClose }: { isOpen: boolean, onClose: 
               <h3 className="font-black text-white uppercase tracking-widest text-base sm:text-lg">Sé Distribuidor</h3>
             </div>
             <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-              Únete a la familia BOTA-NA. Te damos precios especiales de socio para que inicies tu propio negocio y tú pongas tu margen de ganancia.
+              Únete a la familia BOTA-NA. Obtén precios especiales de socio para iniciar tu propio negocio. Contáctanos para recibir el catálogo de distribuidores.
             </p>
 
             <a
