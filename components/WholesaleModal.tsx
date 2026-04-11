@@ -33,20 +33,7 @@ export function WholesaleModal({ isOpen, onClose }: { isOpen: boolean, onClose: 
               Ideal para fiestas, eventos o mesas de snacks. Descuento automático a partir de 20 piezas.
             </p>
 
-            <ul className="text-[11px] sm:text-xs text-zinc-300 space-y-3 font-bold uppercase mb-6">
-              <li className="flex justify-between border-b border-white/5 pb-2">
-                <span>Cacahuates / Gomitas</span>
-                <span className="text-orange-500">$12.50 c/u</span>
-              </li>
-              <li className="flex justify-between border-b border-white/5 pb-2">
-                <span>Papas Artesanales</span>
-                <span className="text-orange-500">$16.50 c/u</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Chips Premium</span>
-                <span className="text-orange-500">$20.50 c/u</span>
-              </li>
-            </ul>
+      
 
             {/* NUEVO BOTÓN CONTACTO MAYOREO */}
             <a
