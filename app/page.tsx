@@ -3,9 +3,9 @@
 import { AboutSection } from "@/components/about-section"
 import { useState, useEffect } from "react"
 import { MenuHeader } from "@/components/menu-header"
+import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
-import { BottomNav } from "@/components/bottom-nav"
 
 const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas"]
 
@@ -34,7 +34,7 @@ export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
 
-  // --- LÓGICA DE SWIPE ---
+  // --- LÓGICA DE SWIPE (Deslizar en celular) ---
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const minSwipeDistance = 50
@@ -105,23 +105,22 @@ export default function MenuPage() {
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <MenuHeader />
 
-        {/* --- SECCIÓN DE PRODUCTOS (Sin Tabs arriba) --- */}
+        {/* --- CATEGORÍAS CON EFECTO DESLIZANTE (Sticky) --- */}
+        <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
+          <CategoryTabs
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+          />
+        </section>
+
+        {/* CUADRÍCULA DE PRODUCTOS */}
         <section
-          className="pt-8 pb-32 sm:pb-16 min-h-[70vh]"
+          className="pb-16 min-h-[70vh]"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* Título de Categoría Actual (Opcional, para que el usuario sepa dónde está) */}
-          <div className="mb-8 text-center sm:hidden">
-             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500/80">
-               Explorando
-             </h2>
-             <p className="text-2xl font-black uppercase tracking-tighter text-white">
-               {activeCategory}
-             </p>
-          </div>
-
           <div
             key={activeCategory}
             className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out"
@@ -149,7 +148,7 @@ export default function MenuPage() {
           )}
         </section>
 
-        <footer className="border-t border-white/10 py-12 mb-20 sm:mb-0">
+        <footer className="border-t border-white/10 py-12">
           <div className="text-center opacity-40">
             <p className="text-[10px] font-black uppercase tracking-widest">BOTA-NA by Saul & Aranza</p>
           </div>
@@ -163,12 +162,6 @@ export default function MenuPage() {
       />
       
       <AboutSection />
-
-      {/* --- EL ÚNICO MENÚ: EL INFERIOR --- */}
-      <BottomNav 
-        activeCategory={activeCategory} 
-        onCategoryChange={setActiveCategory} 
-      />
     </main>
   )
 }
