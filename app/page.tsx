@@ -169,6 +169,11 @@ export default function MenuPage() {
         product={selectedProduct}
       />
       <AboutSection />
+      {/* --- AQUÍ PEGAS EL MENÚ --- */}
+        <BottomNav 
+          activeCategory={activeCategory} 
+          onCategoryChange={setActiveCategory} 
+        />
     </main>
   )
 }
