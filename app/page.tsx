@@ -8,7 +8,7 @@ import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
 
 // 1. Nueva categoría agregada: Bebidas
-const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas"]
+const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas y más"]
 
 const menuItems = [
   { id: 1, name: "Cacahuates Queso", description: "Cacahuates holandeses crujientes con un irresistible sabor a queso.", price: "$15", image: "/images/2.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: true, isSpicy: false },
@@ -27,8 +27,8 @@ const menuItems = [
   { id: 12, name: "Gomitas Tiburon", description: "Gomitas en forma de tiburon con sabor frutal. Divertidas.", price: "$15", image: "/images/18.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: false },
   { id: 13, name: "Gomitas Pic-Osito", description: "Ositos de gomita suaves por dentro enchilados con chile.", price: "$15", image: "/images/11.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
   { id: 14, name: "Gomitas Gusano Diablo", description: "Gusanos de gomita enchilados sabor pepino. El snack picoso.", price: "$15", image: "/images/12.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: true },
-  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural y chamoy.", price: "$30", image: "/images/69.webp", category: "Bebidas", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
-  { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío. Perfecta para acompañar tus botanas.", price: "$20", image: "/images/70.webp", category: "Bebidas", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
+  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural y chamoy.", price: "$30", image: "/images/69.webp", category: "Bebidas y más", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
+  { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío. Perfecta para acompañar tus botanas.", price: "$20", image: "/images/70.webp", category: "Bebidas y más", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
 ]
 
 export default function MenuPage() {
