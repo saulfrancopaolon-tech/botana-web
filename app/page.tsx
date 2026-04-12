@@ -1,5 +1,6 @@
 "use client"
 
+import { BottomNav } from "@/components/bottom-nav" // <-- Agrega esta línea arriba
 import { AboutSection } from "@/components/about-section"
 import { useState, useEffect } from "react"
 import { MenuHeader } from "@/components/menu-header"
