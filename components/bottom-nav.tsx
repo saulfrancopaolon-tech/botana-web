@@ -1,10 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { LayoutGrid, Zap, Disc, Cookie, Candy } from "lucide-react"
 
-// Definimos los iconos para cada categoría de tu page.tsx
 const navItems = [
   { id: "Todos", icon: LayoutGrid },
   { id: "Cacahuates", icon: Zap },
@@ -19,14 +17,16 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeCategory, onCategoryChange }: BottomNavProps) {
-  // Encontramos el índice basado en el nombre de la categoría activa
   const activeIndex = navItems.findIndex(item => item.id === activeCategory)
+  
+  // SOLUCIÓN: Extraemos el icono a una variable que empiece con Mayúscula
+  const ActiveIcon = navItems[activeIndex >= 0 ? activeIndex : 0].icon
 
   return (
     <nav className="fixed bottom-6 left-1/2 z-[90] w-[95%] max-w-md -translate-x-1/2 sm:hidden">
       <div className="relative flex h-16 items-center justify-around rounded-[2.5rem] bg-zinc-900/90 border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
         
-        {/* El Círculo Flotante (Indicador) */}
+        {/* El Círculo Flotante */}
         <motion.div
           layoutId="activeTabIndicator"
           className="absolute -top-6 flex h-14 w-14 items-center justify-center rounded-full bg-orange-500 shadow-[0_10px_20px_rgba(249,115,22,0.4)] border-[6px] border-zinc-950"
@@ -34,7 +34,8 @@ export function BottomNav({ activeCategory, onCategoryChange }: BottomNavProps) 
           transition={{ type: "spring", stiffness: 350, damping: 25 }}
         >
           <div className="text-white">
-            {navItems[activeIndex]?.icon && <navItems[activeIndex].icon className="h-6 w-6" />}
+            {/* Ahora usamos la variable ActiveIcon directamente */}
+            <ActiveIcon className="h-6 w-6" />
           </div>
         </motion.div>
 
@@ -49,12 +50,10 @@ export function BottomNav({ activeCategory, onCategoryChange }: BottomNavProps) 
               onClick={() => onCategoryChange(item.id)}
               className="relative flex h-full w-full flex-col items-center justify-center"
             >
-              {/* Icono pequeño gris que desaparece cuando está activo */}
               <div className={`transition-all duration-300 ${isActive ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
                 <Icon className="h-5 w-5 text-zinc-600" />
               </div>
               
-              {/* Texto pequeño debajo */}
               <span className={`absolute bottom-2 text-[7px] font-black uppercase tracking-tighter transition-all duration-300 ${isActive ? "opacity-100 text-orange-500" : "opacity-0"}`}>
                 {item.id}
               </span>
