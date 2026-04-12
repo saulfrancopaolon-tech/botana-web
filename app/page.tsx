@@ -7,7 +7,8 @@ import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
 
-const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas"]
+// 1. Nueva categoría agregada: Bebidas
+const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas"]
 
 const menuItems = [
   { id: 1, name: "Cacahuates Queso", description: "Cacahuates holandeses crujientes con un irresistible sabor a queso.", price: "$15", image: "/images/2.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: true, isSpicy: false },
@@ -26,6 +27,8 @@ const menuItems = [
   { id: 12, name: "Gomitas Tiburon", description: "Gomitas en forma de tiburon con sabor frutal. Divertidas.", price: "$15", image: "/images/18.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: false },
   { id: 13, name: "Gomitas Pic-Osito", description: "Ositos de gomita suaves por dentro enchilados con chile.", price: "$15", image: "/images/11.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
   { id: 14, name: "Gomitas Gusano Diablo", description: "Gusanos de gomita enchilados sabor pepino. El snack picoso.", price: "$15", image: "/images/12.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: true },
+  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural y chamoy.", price: "$30", image: "/images/69.webp", category: "Bebidas", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
+  { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío. Perfecta para acompañar tus botanas.", price: "$20", image: "/images/70.webp", category: "Bebidas", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
 ]
 
 export default function MenuPage() {
@@ -34,7 +37,7 @@ export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
 
-  // --- LÓGICA DE SWIPE (Deslizar en celular) ---
+  // --- LÓGICA DE SWIPE ---
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const minSwipeDistance = 50
@@ -105,7 +108,6 @@ export default function MenuPage() {
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <MenuHeader />
 
-        {/* --- CATEGORÍAS CON EFECTO DESLIZANTE (Sticky) --- */}
         <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
           <CategoryTabs
             categories={categories}
@@ -114,7 +116,6 @@ export default function MenuPage() {
           />
         </section>
 
-        {/* CUADRÍCULA DE PRODUCTOS */}
         <section
           className="pb-16 min-h-[70vh]"
           onTouchStart={onTouchStart}
@@ -143,7 +144,7 @@ export default function MenuPage() {
 
           {filteredItems.length === 0 && (
             <div className="py-20 text-center opacity-50">
-              <p>No hay botanas disponibles aquí.</p>
+              <p>Próximamente más sorpresas...</p>
             </div>
           )}
         </section>
