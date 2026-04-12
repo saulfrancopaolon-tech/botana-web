@@ -7,8 +7,8 @@ import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
 
-// 1. Nueva categoría agregada: Bebidas
-const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas y más"]
+// 1. Agregamos el "🔥 TOP" al inicio y "Bebidas y más" al final
+const categories = ["🔥 TOP", "Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas y más"]
 
 const menuItems = [
   { id: 1, name: "Cacahuates Queso", description: "Cacahuates holandeses crujientes con un irresistible sabor a queso.", price: "$15", image: "/images/2.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: true, isSpicy: false },
@@ -27,17 +27,17 @@ const menuItems = [
   { id: 12, name: "Gomitas Tiburon", description: "Gomitas en forma de tiburon con sabor frutal. Divertidas.", price: "$15", image: "/images/18.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: false },
   { id: 13, name: "Gomitas Pic-Osito", description: "Ositos de gomita suaves por dentro enchilados con chile.", price: "$15", image: "/images/11.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
   { id: 14, name: "Gomitas Gusano Diablo", description: "Gusanos de gomita enchilados sabor pepino. El snack picoso.", price: "$15", image: "/images/12.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: true },
-  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural y chamoy.", price: "$30", image: "/images/69.webp", category: "Bebidas y más", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
-  { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío. Perfecta para acompañar tus botanas.", price: "$20", image: "/images/70.webp", category: "Bebidas y más", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
+  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural, chamoy artesanal y gomitas enchiladas.", price: "$35", image: "/images/69.webp", category: "Bebidas y más", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
+  { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío.", price: "$20", image: "/images/70.webp", category: "Bebidas y más", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
 ]
 
 export default function MenuPage() {
-  const [activeCategory, setActiveCategory] = useState("Todos")
+  const [activeCategory, setActiveCategory] = useState("🔥 TOP") // Empezamos mostrando lo más popular
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
 
-  // --- LÓGICA DE SWIPE ---
+  // Lógica de Swipe
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const minSwipeDistance = 50
@@ -68,7 +68,7 @@ export default function MenuPage() {
     }
   }
 
-  // --- CARGA DE STOCK ---
+  // Carga de Stock
   useEffect(() => {
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv")
       .then((res) => res.text())
@@ -92,7 +92,11 @@ export default function MenuPage() {
     inStock: stockData[item.id] !== undefined ? stockData[item.id] : true,
   }))
 
-  const filteredItems = activeCategory === "Todos"
+  // NUEVA LÓGICA DE FILTRADO
+  const filteredItems = 
+    activeCategory === "🔥 TOP" 
+    ? itemsWithStock.filter(item => item.isPopular) 
+    : activeCategory === "Todos"
     ? itemsWithStock
     : itemsWithStock.filter((item) => item.category === activeCategory)
 
