@@ -1,12 +1,12 @@
 "use client"
 
-import { BottomNav } from "@/components/bottom-nav" // <-- Agrega esta línea arriba
 import { AboutSection } from "@/components/about-section"
 import { useState, useEffect } from "react"
 import { MenuHeader } from "@/components/menu-header"
 import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
+import { BottomNav } from "@/components/bottom-nav"
 
 const categories = ["Todos", "Cacahuates", "Chips", "Papas", "Gomitas"]
 
@@ -35,11 +35,9 @@ export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
 
-  // --- ESTADOS PARA EL SWIPE (Deslizar en celular) ---
+  // --- LÓGICA DE SWIPE ---
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
-
-  // Distancia mínima requerida para considerar que fue un "swipe" y no un toque accidental (50px)
   const minSwipeDistance = 50
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -59,19 +57,16 @@ export default function MenuPage() {
 
     if (isLeftSwipe || isRightSwipe) {
       const currentIndex = categories.indexOf(activeCategory)
-
-      // Deslizó hacia la izquierda (Avanza categoría)
       if (isLeftSwipe && currentIndex < categories.length - 1) {
         setActiveCategory(categories[currentIndex + 1])
       }
-      // Deslizó hacia la derecha (Retrocede categoría)
       if (isRightSwipe && currentIndex > 0) {
         setActiveCategory(categories[currentIndex - 1])
       }
     }
   }
-  // --------------------------------------------------
 
+  // --- CARGA DE STOCK DESDE GOOGLE SHEETS ---
   useEffect(() => {
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv")
       .then((res) => res.text())
@@ -105,13 +100,14 @@ export default function MenuPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-zinc-950 text-zinc-50 overflow-hidden">
+    <main className="relative min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
+      {/* Efecto de luz de fondo */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <MenuHeader />
 
-        {/* Las pestañas de arriba se actualizarán solas cuando deslices */}
+        {/* Pestañas superiores (Sticky) */}
         <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
           <CategoryTabs
             categories={categories}
@@ -120,14 +116,13 @@ export default function MenuPage() {
           />
         </section>
 
-        {/* AREA SENSIBLE AL TACTO (SWIPE) */}
+        {/* Cuadrícula de productos con soporte para Swipe */}
         <section
-          className="pb-12 sm:pb-16 min-h-[60vh]"
+          className="pb-24 sm:pb-16 min-h-[60vh]"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* Le puse un 'key' con la categoría para que haga una pequeña animación de "fade" cada que deslizas */}
           <div
             key={activeCategory}
             className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out"
@@ -148,7 +143,6 @@ export default function MenuPage() {
             ))}
           </div>
 
-          {/* Mensaje por si una categoría se queda sin productos en tu Excel */}
           {filteredItems.length === 0 && (
             <div className="py-20 text-center opacity-50">
               <p>No hay botanas disponibles aquí.</p>
@@ -156,7 +150,7 @@ export default function MenuPage() {
           )}
         </section>
 
-        <footer className="border-t border-white/10 py-8">
+        <footer className="border-t border-white/10 py-12 mb-20 sm:mb-0">
           <div className="text-center opacity-40">
             <p className="text-[10px] font-black uppercase tracking-widest">BOTA-NA by Saul & Aranza</p>
           </div>
@@ -168,12 +162,14 @@ export default function MenuPage() {
         onClose={() => setIsModalOpen(false)}
         product={selectedProduct}
       />
+      
       <AboutSection />
-      {/* --- AQUÍ PEGAS EL MENÚ --- */}
-        <BottomNav 
-          activeCategory={activeCategory} 
-          onCategoryChange={setActiveCategory} 
-        />
+
+      {/* --- EL NUEVO MENÚ INFERIOR TIPO APP --- */}
+      <BottomNav 
+        activeCategory={activeCategory} 
+        onCategoryChange={setActiveCategory} 
+      />
     </main>
   )
 }
