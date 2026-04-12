@@ -3,7 +3,6 @@
 import { AboutSection } from "@/components/about-section"
 import { useState, useEffect } from "react"
 import { MenuHeader } from "@/components/menu-header"
-import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
 import { BottomNav } from "@/components/bottom-nav"
@@ -66,7 +65,7 @@ export default function MenuPage() {
     }
   }
 
-  // --- CARGA DE STOCK DESDE GOOGLE SHEETS ---
+  // --- CARGA DE STOCK ---
   useEffect(() => {
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv")
       .then((res) => res.text())
@@ -101,28 +100,28 @@ export default function MenuPage() {
 
   return (
     <main className="relative min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
-      {/* Efecto de luz de fondo */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <MenuHeader />
 
-        {/* Pestañas superiores (Sticky) */}
-        <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
-          <CategoryTabs
-            categories={categories}
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-          />
-        </section>
-
-        {/* Cuadrícula de productos con soporte para Swipe */}
+        {/* --- SECCIÓN DE PRODUCTOS (Sin Tabs arriba) --- */}
         <section
-          className="pb-24 sm:pb-16 min-h-[60vh]"
+          className="pt-8 pb-32 sm:pb-16 min-h-[70vh]"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
+          {/* Título de Categoría Actual (Opcional, para que el usuario sepa dónde está) */}
+          <div className="mb-8 text-center sm:hidden">
+             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500/80">
+               Explorando
+             </h2>
+             <p className="text-2xl font-black uppercase tracking-tighter text-white">
+               {activeCategory}
+             </p>
+          </div>
+
           <div
             key={activeCategory}
             className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out"
@@ -165,7 +164,7 @@ export default function MenuPage() {
       
       <AboutSection />
 
-      {/* --- EL NUEVO MENÚ INFERIOR TIPO APP --- */}
+      {/* --- EL ÚNICO MENÚ: EL INFERIOR --- */}
       <BottomNav 
         activeCategory={activeCategory} 
         onCategoryChange={setActiveCategory} 
