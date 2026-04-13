@@ -27,7 +27,7 @@ const menuItems = [
   { id: 12, name: "Gomitas Tiburon", description: "Gomitas en forma de tiburon con sabor frutal. Divertidas.", price: "$15", image: "/images/18.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: false, isSpicy: false },
   { id: 13, name: "Gomitas Pic-Osito", description: "Ositos de gomita suaves por dentro enchilados con chile.", price: "$15", image: "/images/11.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
   { id: 14, name: "Gomitas Gusano Diablo", description: "Gusanos de gomita enchilados sabor pepino. El snack picoso.", price: "$15", image: "/images/12.webp", category: "Gomitas", tags: ["100 gramos"], isPopular: true, isSpicy: true },
-  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural, chamoy artesanal y gomitas enchiladas.", price: "$35", image: "/images/69.webp", category: "Bebidas y más", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
+  { id: 17, name: "Mangonada", description: "Deliciosa combinación de mango natural y chamoy.", price: "$30", image: "/images/69.webp", category: "Bebidas y más", tags: ["Fresco", "Frutal"], isPopular: true, isSpicy: true },
   { id: 18, name: "Agua de Jamaica", description: "Refrescante agua de jamaica natural infusionada en frío.", price: "$20", image: "/images/70.webp", category: "Bebidas y más", tags: ["500ml", "Natural"], isPopular: false, isSpicy: false },
 ]
 
