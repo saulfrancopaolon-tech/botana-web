@@ -16,11 +16,9 @@ export function CategoryTabs({ categories, activeCategory, onCategoryChange }: a
   }, [activeCategory])
 
   return (
-    /* CONTENEDOR 'RECORTADOR': Oculta lo que sobresalga abajo */
     <div className="relative w-full px-4 overflow-hidden h-[50px]">
       <div 
         ref={scrollRef}
-        /* Añadimos pb-8 para que la barra de scroll baje y el 'overflow-hidden' de arriba la corte */
         className="flex overflow-x-auto no-scrollbar items-center pb-8 -mb-8 pt-2"
       >
         <div className="flex bg-zinc-900/40 p-1.5 rounded-full border border-white/5 backdrop-blur-md shrink-0">
@@ -30,7 +28,13 @@ export function CategoryTabs({ categories, activeCategory, onCategoryChange }: a
               <button
                 key={category}
                 id={`tab-${category}`}
-                onClick={() => onCategoryChange(category)}
+                /* 1. AGREGAMOS type="button" para que no haga submit */
+                type="button" 
+                onClick={(e) => {
+                  /* 2. EVITAMOS cualquier comportamiento por defecto */
+                  e.preventDefault(); 
+                  onCategoryChange(category);
+                }}
                 className={`relative flex-shrink-0 px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors duration-300 ${
                   isActive ? "text-white" : "text-zinc-500"
                 }`}
