@@ -2,33 +2,47 @@
 
 import Image from "next/image"
 import { useState } from "react"
-import { MapPin, Instagram, Wallet, Store } from "lucide-react"
+import { MapPin, Instagram, Wallet, Store, Menu } from "lucide-react"
 import { LoyaltyWallet } from "./loyalty-wallet"
 import { WholesaleModal } from "./WholesaleModal"
+import { MobileMenu } from "./mobile-menu"
 
-export function MenuHeader() {
+interface MenuHeaderProps {
+  categories: string[]
+  onCategoryChange: (cat: string) => void
+}
+
+export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
   const [isWalletOpen, setIsWalletOpen] = useState(false)
   const [isWholesaleOpen, setIsWholesaleOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-zinc-950/90 py-4 text-center backdrop-blur-2xl">
         
-        {/* BOTÓN SUPERIOR DE MAYOREO RE-DISEÑADO */}
+        {/* BOTÓN MENÚ (IZQUIERDA) */}
+        <div className="absolute top-3 left-4">
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* BOTÓN MAYOREO (DERECHA) */}
         <div className="absolute top-3 right-4">
           <button
             onClick={() => setIsWholesaleOpen(true)}
             className="group relative flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/30 px-3 py-1.5 text-[9px] font-black text-orange-500 hover:bg-orange-500 hover:text-white transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(249,115,22,0.1)] active:scale-95"
           >
-            {/* Punto de notificación animado */}
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
             </span>
-            
             <Store className="h-3 w-3" />
-            <span className="hidden sm:inline">Distribuidor / Mayoreo</span>
-            <span className="sm:hidden">Mayoreo</span>
+            <span className="hidden sm:inline">Mayoreo</span>
           </button>
         </div>
 
@@ -67,6 +81,14 @@ export function MenuHeader() {
           </div>
         </div>
       </header>
+
+      <MobileMenu 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)}
+        onCategorySelect={onCategoryChange}
+        onOpenWholesale={() => setIsWholesaleOpen(true)}
+        categories={categories}
+      />
 
       <LoyaltyWallet isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} />
       <WholesaleModal isOpen={isWholesaleOpen} onClose={() => setIsWholesaleOpen(false)} />
