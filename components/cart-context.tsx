@@ -170,7 +170,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
                 <button
                   onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#25D366] text-white px-6 py-4 font-black shadow-lg shadow-[#25D366]/20 transition-transform hover:scale-[1.02] active:scale-95"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-white text-white px-6 py-4 font-black shadow-lg shadow-[#25D366]/20 transition-transform hover:scale-[1.02] active:scale-95"
                 >
                   <Send className="h-5 w-5" />
                   PEDIR A ARANZA
