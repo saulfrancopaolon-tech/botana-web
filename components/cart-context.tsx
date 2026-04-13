@@ -30,14 +30,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsMounted(true)
   }, [])
 
-  // --- SOLUCIÓN AL BLOQUEO DE SCROLL ---
+  // --- BLOQUEO DE SCROLL (Solución definitiva al movimiento raro) ---
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
+      document.body.style.touchAction = "none" // Bloqueo extra para móviles
     } else {
       document.body.style.overflow = "unset"
+      document.body.style.touchAction = "auto"
     }
-    return () => { document.body.style.overflow = "unset" }
+    return () => {
+      document.body.style.overflow = "unset"
+      document.body.style.touchAction = "auto"
+    }
   }, [isOpen])
 
   const addToCart = (product: { id: string; name: string; price: number }) => {
@@ -85,7 +90,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, getTotal }}>
       {children}
 
-      {/* BOTÓN FLOTANTE CON ANIMACIÓN SUAVE (Eliminamos el parpadeo raro) */}
       <AnimatePresence>
         {isMounted && totalItems > 0 && (
           <motion.button
@@ -98,11 +102,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           >
             <div className="relative">
               <ShoppingBag className="h-6 w-6" />
-              {/* Contador con animación de "pop" al cambiar el número */}
+              {/* CORRECCIÓN: backgroundColor en lugar de bg */}
               <motion.span 
                 key={totalItems}
-                initial={{ scale: 1.5, bg: "#fff" }}
-                animate={{ scale: 1, bg: "#000" }}
+                initial={{ scale: 1.5, backgroundColor: "#ffffff", color: "#000" }}
+                animate={{ scale: 1, backgroundColor: "#000000", color: "#fff" }}
                 className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-black text-white border-2 border-zinc-950 text-[10px] font-black"
               >
                 {totalItems}
@@ -112,10 +116,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* PANEL LATERAL DEL CARRITO */}
       <AnimatePresence>
         {isMounted && isOpen && (
-          <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="fixed inset-0 z-[100] flex justify-end">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -131,7 +134,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="relative w-full max-w-md bg-zinc-950 border-l border-white/5 shadow-2xl flex flex-col h-full"
             >
-              {/* Header Carrito */}
               <div className="flex items-center justify-between p-6 border-b border-white/5">
                 <h2 className="text-xl font-black text-white italic tracking-tighter flex items-center gap-3">
                   <div className="h-8 w-8 rounded-lg bg-[oklch(0.55_0.15_45)] flex items-center justify-center">
@@ -144,7 +146,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              {/* Lista de Productos */}
               <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4">
                 {cart.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center text-center opacity-20 text-white">
@@ -153,58 +154,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   </div>
                 ) : (
                   cart.map((item) => (
-                    <motion.div 
-                      layout
-                      key={item.id} 
-                      className="flex items-center justify-between rounded-[1.5rem] bg-white/5 p-4 border border-white/5"
-                    >
+                    <motion.div layout key={item.id} className="flex items-center justify-between rounded-[1.5rem] bg-white/5 p-4 border border-white/5">
                       <div className="flex-1">
                         <h3 className="font-black text-white text-sm uppercase tracking-tight">{item.name}</h3>
                         <p className="text-[oklch(0.55_0.15_45)] font-black text-sm">${item.price * item.quantity}</p>
                       </div>
-                      
                       <div className="flex items-center gap-4 bg-black/40 rounded-full px-3 py-1.5 border border-white/10">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-zinc-500 hover:text-white active:scale-75 transition-all">
-                          <Minus className="h-4 w-4" />
-                        </button>
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-zinc-500 hover:text-white transition-all"><Minus className="h-4 w-4" /></button>
                         <span className="w-4 text-center text-sm font-black text-white">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-zinc-500 hover:text-white active:scale-75 transition-all">
-                          <Plus className="h-4 w-4" />
-                        </button>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-zinc-500 hover:text-white transition-all"><Plus className="h-4 w-4" /></button>
                       </div>
                     </motion.div>
                   ))
                 )}
               </div>
 
-              {/* Footer Checkout */}
               <div className="p-6 bg-zinc-900/50 border-t border-white/5 space-y-6">
                 <div className="flex justify-between items-end">
                   <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Total Estimado</span>
                   <span className="text-3xl font-black text-white tracking-tighter">${getTotal()}</span>
                 </div>
-
                 <div className="grid grid-cols-1 gap-3">
-                  <button
-                    onClick={() => handleWhatsAppCheckout("524774950232", "Saúl")}
-                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-white text-black px-6 py-4 font-black italic shadow-xl active:scale-95 transition-all"
-                  >
-                    <Send className="h-5 w-5" />
-                    PEDIR A SAÚL
+                  <button onClick={() => handleWhatsAppCheckout("524774950232", "Saúl")} className="w-full flex items-center justify-center gap-3 rounded-2xl bg-white text-black px-6 py-4 font-black italic shadow-xl active:scale-95 transition-all">
+                    <Send className="h-5 w-5" /> PEDIR A SAÚL
                   </button>
-
-                  <button
-                    onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")}
-                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-zinc-800 text-white px-6 py-4 font-black italic border border-white/5 active:scale-95 transition-all"
-                  >
-                    <Send className="h-5 w-5" />
-                    PEDIR A ARANZA
+                  <button onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")} className="w-full flex items-center justify-center gap-3 rounded-2xl bg-zinc-800 text-white px-6 py-4 font-black italic border border-white/5 active:scale-95 transition-all">
+                    <Send className="h-5 w-5" /> PEDIR A ARANZA
                   </button>
                 </div>
-                
-                <p className="text-[9px] text-center text-zinc-600 font-bold uppercase tracking-[0.3em]">
-                  León, Gto. • Entrega Personal
-                </p>
               </div>
             </motion.div>
           </div>
