@@ -7,7 +7,7 @@ import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
 
-// 1. Agregamos el "🔥 TOP" al inicio y "Bebidas y más" al final
+// Lista de categorías para el menú y las pestañas
 const categories = ["🔥 TOP", "Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas y más"]
 
 const menuItems = [
@@ -32,12 +32,12 @@ const menuItems = [
 ]
 
 export default function MenuPage() {
-  const [activeCategory, setActiveCategory] = useState("🔥 TOP") // Empezamos mostrando lo más popular
+  const [activeCategory, setActiveCategory] = useState("🔥 TOP")
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
 
-  // Lógica de Swipe
+  // --- LÓGICA DE SWIPE (Deslizar en celular) ---
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const minSwipeDistance = 50
@@ -68,7 +68,7 @@ export default function MenuPage() {
     }
   }
 
-  // Carga de Stock
+  // --- CARGA DE STOCK DESDE GOOGLE SHEETS ---
   useEffect(() => {
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv")
       .then((res) => res.text())
@@ -92,7 +92,7 @@ export default function MenuPage() {
     inStock: stockData[item.id] !== undefined ? stockData[item.id] : true,
   }))
 
-  // NUEVA LÓGICA DE FILTRADO
+  // Lógica de filtrado avanzada
   const filteredItems = 
     activeCategory === "🔥 TOP" 
     ? itemsWithStock.filter(item => item.isPopular) 
@@ -107,11 +107,18 @@ export default function MenuPage() {
 
   return (
     <main className="relative min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
+      {/* Efecto de iluminación ambiental */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <MenuHeader />
+        
+        {/* HEADER: Recibe categorías y función para el menú lateral */}
+        <MenuHeader 
+          categories={categories} 
+          onCategoryChange={setActiveCategory} 
+        />
 
+        {/* CATEGORÍAS SUPERIORES (Efecto pastilla naranja) */}
         <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
           <CategoryTabs
             categories={categories}
@@ -120,6 +127,7 @@ export default function MenuPage() {
           />
         </section>
 
+        {/* CUADRÍCULA DE PRODUCTOS (Soporta Swipe) */}
         <section
           className="pb-16 min-h-[70vh]"
           onTouchStart={onTouchStart}
