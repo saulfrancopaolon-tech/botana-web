@@ -30,18 +30,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsMounted(true)
   }, [])
 
-  // --- BLOQUEO DE SCROLL (Solución definitiva al movimiento raro) ---
+  // --- CORRECCIÓN DEFINITIVA AL BLOQUEO DE CLICKS ---
   useEffect(() => {
     if (isOpen) {
+      // Bloqueamos solo el scroll, permitiendo la interacción
       document.body.style.overflow = "hidden"
-      document.body.style.touchAction = "none" // Bloqueo extra para móviles
+      document.body.style.paddingRight = "0px" // Evita saltos visuales en desktop
     } else {
       document.body.style.overflow = "unset"
-      document.body.style.touchAction = "auto"
+      document.body.style.paddingRight = "0px"
     }
+
+    // Limpieza al desmontar para que NUNCA se quede bloqueado
     return () => {
       document.body.style.overflow = "unset"
-      document.body.style.touchAction = "auto"
     }
   }, [isOpen])
 
@@ -102,7 +104,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           >
             <div className="relative">
               <ShoppingBag className="h-6 w-6" />
-              {/* CORRECCIÓN: backgroundColor en lugar de bg */}
               <motion.span 
                 key={totalItems}
                 initial={{ scale: 1.5, backgroundColor: "#ffffff", color: "#000" }}
@@ -160,9 +161,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                         <p className="text-[oklch(0.55_0.15_45)] font-black text-sm">${item.price * item.quantity}</p>
                       </div>
                       <div className="flex items-center gap-4 bg-black/40 rounded-full px-3 py-1.5 border border-white/10">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-zinc-500 hover:text-white transition-all"><Minus className="h-4 w-4" /></button>
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-zinc-500 hover:text-white transition-all">
+                          <Minus className="h-4 w-4" />
+                        </button>
                         <span className="w-4 text-center text-sm font-black text-white">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-zinc-500 hover:text-white transition-all"><Plus className="h-4 w-4" /></button>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-zinc-500 hover:text-white transition-all">
+                          <Plus className="h-4 w-4" />
+                        </button>
                       </div>
                     </motion.div>
                   ))
@@ -175,10 +180,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   <span className="text-3xl font-black text-white tracking-tighter">${getTotal()}</span>
                 </div>
                 <div className="grid grid-cols-1 gap-3">
-                  <button onClick={() => handleWhatsAppCheckout("524774950232", "Saúl")} className="w-full flex items-center justify-center gap-3 rounded-2xl bg-white text-black px-6 py-4 font-black italic shadow-xl active:scale-95 transition-all">
+                  <button onClick={() => handleWhatsAppCheckout("524774950232", "Saúl")} className="w-full flex items-center justify-center gap-3 rounded-2xl bg-white text-black px-6 py-4 font-black shadow-xl active:scale-95 transition-all">
                     <Send className="h-5 w-5" /> PEDIR A SAÚL
                   </button>
-                  <button onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")} className="w-full flex items-center justify-center gap-3 rounded-2xl bg-zinc-800 text-white px-6 py-4 font-black italic border border-white/5 active:scale-95 transition-all">
+                  <button onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")} className="w-full flex items-center justify-center gap-3 rounded-2xl bg-zinc-800 text-white px-6 py-4 font-black border border-white/5 active:scale-95 transition-all">
                     <Send className="h-5 w-5" /> PEDIR A ARANZA
                   </button>
                 </div>
