@@ -3,16 +3,9 @@
 import { motion } from "framer-motion"
 import { useRef, useEffect } from "react"
 
-interface CategoryTabsProps {
-  categories: string[]
-  activeCategory: string
-  onCategoryChange: (category: string) => void
-}
-
-export function CategoryTabs({ categories, activeCategory, onCategoryChange }: CategoryTabsProps) {
+export function CategoryTabs({ categories, activeCategory, onCategoryChange }: any) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Lógica de Auto-centrado: Mueve el scroll para que la categoría activa siempre esté a la vista
   useEffect(() => {
     const activeElement = document.getElementById(`tab-${activeCategory}`)
     if (activeElement && scrollRef.current) {
@@ -23,44 +16,38 @@ export function CategoryTabs({ categories, activeCategory, onCategoryChange }: C
   }, [activeCategory])
 
   return (
-    <div className="relative w-full px-4 overflow-hidden">
-      {/* Contenedor con Scroll Horizontal Invisible */}
+    /* CONTENEDOR 'RECORTADOR': Oculta lo que sobresalga abajo */
+    <div className="relative w-full px-4 overflow-hidden h-[50px]">
       <div 
         ref={scrollRef}
-        className="flex overflow-x-auto no-scrollbar items-center py-2 transition-all"
+        /* Añadimos pb-8 para que la barra de scroll baje y el 'overflow-hidden' de arriba la corte */
+        className="flex overflow-x-auto no-scrollbar items-center pb-8 -mb-8 pt-2"
       >
-        <div className="flex bg-zinc-900/40 p-1.5 rounded-full border border-white/5 backdrop-blur-md">
-          {categories.map((category) => {
+        <div className="flex bg-zinc-900/40 p-1.5 rounded-full border border-white/5 backdrop-blur-md shrink-0">
+          {categories.map((category: string) => {
             const isActive = activeCategory === category
-
             return (
               <button
                 key={category}
                 id={`tab-${category}`}
                 onClick={() => onCategoryChange(category)}
                 className={`relative flex-shrink-0 px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors duration-300 ${
-                  isActive ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                  isActive ? "text-white" : "text-zinc-500"
                 }`}
               >
-                {/* Indicador de categoría activa (La "Pastilla" Cobre) */}
                 {isActive && (
                   <motion.div
                     layoutId="activeCategoryTab"
-                    className="absolute inset-0 rounded-full bg-[oklch(0.55_0.15_45)] shadow-[0_4px_12px_rgba(194,65,12,0.3)]"
+                    className="absolute inset-0 rounded-full bg-[oklch(0.55_0.15_45)] shadow-lg"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                
                 <span className="relative z-10">{category}</span>
               </button>
             )
           })}
         </div>
       </div>
-
-      {/* Gradientes sutiles a los lados (Opcional, para look industrial) */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-zinc-950 to-transparent sm:hidden" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-zinc-950 to-transparent sm:hidden" />
     </div>
   )
 }
