@@ -1,95 +1,103 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Menu, LayoutGrid, Info, Store, HelpCircle, Instagram, Phone } from "lucide-react"
+import { X, LayoutGrid, Store, Info, HelpCircle, ChevronDown, Instagram, Phone, Home } from "lucide-react"
+import { useState } from "react"
 
 interface MobileMenuProps {
   isOpen: boolean
   onClose: () => void
   onCategorySelect: (cat: string) => void
   onOpenWholesale: () => void
+  categories: string[]
 }
 
-export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale }: MobileMenuProps) {
-  const menuItems = [
-    { name: "Cacahuates", icon: LayoutGrid },
-    { name: "Chips", icon: LayoutGrid },
-    { name: "Papas", icon: LayoutGrid },
-    { name: "Gomitas", icon: LayoutGrid },
-    { name: "Bebidas y más", icon: LayoutGrid },
-  ]
+export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale, categories }: MobileMenuProps) {
+  const [isProductsOpen, setIsProductsOpen] = useState(true)
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Fondo oscuro detrás */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md"
           />
 
-          {/* Menú Lateral */}
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-[120] w-[280px] bg-zinc-950 border-r border-white/5 p-6 shadow-2xl"
+            className="fixed inset-y-0 left-0 z-[120] w-[300px] bg-zinc-950 border-r border-white/5 p-6 shadow-2xl"
           >
             <div className="flex flex-col h-full">
-              {/* Header del Menú */}
               <div className="flex items-center justify-between mb-10">
-                <span className="text-xl font-black tracking-tighter text-white uppercase">Bota-na</span>
+                <div className="flex items-center gap-2">
+                   <div className="h-8 w-8 rounded-lg bg-orange-500 flex items-center justify-center font-black text-white italic">B</div>
+                   <span className="text-xl font-black tracking-tighter text-white uppercase italic">Bota-na</span>
+                </div>
                 <button onClick={onClose} className="p-2 rounded-full bg-white/5 text-zinc-400">
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              {/* Secciones del Menú */}
-              <div className="space-y-8 overflow-y-auto no-scrollbar flex-grow">
-                
-                {/* GRUPO 1: PRODUCTOS */}
+              <div className="flex-grow overflow-y-auto no-scrollbar space-y-6">
+                {/* SECCIÓN PRODUCTOS CON DESPLEGABLE */}
                 <div>
-                  <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4">Productos</p>
-                  <div className="space-y-2">
-                    {menuItems.map((item) => (
-                      <button
-                        key={item.name}
-                        onClick={() => { onCategorySelect(item.name); onClose(); }}
-                        className="flex w-full items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5 text-sm font-bold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+                  <button 
+                    onClick={() => setIsProductsOpen(!isProductsOpen)}
+                    className="flex w-full items-center justify-between text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4"
+                  >
+                    Categorías
+                    <ChevronDown className={`h-3 w-3 transition-transform ${isProductsOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {isProductsOpen && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="space-y-1 overflow-hidden"
                       >
-                        <item.icon className="h-4 w-4 text-orange-500" />
-                        {item.name}
-                      </button>
-                    ))}
-                  </div>
+                        {categories.map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => { onCategorySelect(cat); onClose(); }}
+                            className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-zinc-400 hover:bg-white/5 hover:text-white transition-all"
+                          >
+                            <LayoutGrid className="h-4 w-4 text-orange-500/50" />
+                            {cat}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                {/* GRUPO 2: NEGOCIO */}
-                <div>
-                  <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4">Negocio</p>
-                  <div className="space-y-2">
-                    <button 
-                      onClick={() => { onOpenWholesale(); onClose(); }}
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-sm font-bold text-orange-500"
-                    >
-                      <Store className="h-4 w-4" />
-                      Mayoreo / Distribuidor
-                    </button>
-                  </div>
+                {/* SECCIÓN NEGOCIO */}
+                <div className="pt-4 border-t border-white/5">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4">Negocio</p>
+                  <button 
+                    onClick={() => { onOpenWholesale(); onClose(); }}
+                    className="flex w-full items-center gap-3 px-4 py-4 rounded-2xl bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95 transition-all text-sm font-black italic"
+                  >
+                    <Store className="h-5 w-5" />
+                    MAYOREO Y DISTRIBUIDOR
+                  </button>
                 </div>
 
-                {/* GRUPO 3: NOSOTROS */}
-                <div>
-                  <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4">Información</p>
-                  <div className="space-y-2">
+                {/* SECCIÓN INFO */}
+                <div className="pt-4 border-t border-white/5">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4">Ayuda</p>
+                  <div className="space-y-1">
                     <a href="#about" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-sm font-bold text-zinc-400 hover:text-white transition-all">
                       <Info className="h-4 w-4" />
-                      Quiénes somos
+                      Quiénes Somos
                     </a>
                     <a href="#about" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-sm font-bold text-zinc-400 hover:text-white transition-all">
                       <HelpCircle className="h-4 w-4" />
@@ -99,13 +107,15 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale 
                 </div>
               </div>
 
-              {/* Footer del Menú */}
-              <div className="pt-6 border-t border-white/5 flex justify-between items-center">
-                <div className="flex gap-4">
-                  <Instagram className="h-5 w-5 text-zinc-500" />
-                  <Phone className="h-5 w-5 text-zinc-500" />
+              {/* FOOTER MENU */}
+              <div className="mt-auto pt-6 border-t border-white/5">
+                <div className="flex items-center justify-between text-zinc-600">
+                  <div className="flex gap-4">
+                    <Instagram className="h-5 w-5 hover:text-white transition-colors" />
+                    <Phone className="h-5 w-5 hover:text-white transition-colors" />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest">León, Gto.</span>
                 </div>
-                <p className="text-[8px] font-black text-zinc-700 uppercase">León, Gto. 2026</p>
               </div>
             </div>
           </motion.div>
