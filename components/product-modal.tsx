@@ -23,44 +23,38 @@ export function ProductModal({ isOpen, onClose, product }: any) {
     setTimeout(() => {
       onClose()
       setTimeout(() => setIsAdding(false), 200)
-    }, 600) // Un poco más de tiempo para apreciar el efecto
+    }, 600) 
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* IMPORTANTE: He quitado la "X" manual. 
-        Si la "X" del sistema sigue estorbando, añade 'hide-close' a className 
-        y la manejamos por CSS, pero por ahora solo eliminé la duplicada.
-      */}
+      {/* 1. LIMPIEZA: Quitamos las clases de animación de Tailwind para evitar conflictos */}
       <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar [&>button]:text-white [&>button]:bg-black/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5">
         
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          /* 2. ENTRADA: Animación de expansión limpia */
+          initial={{ scale: 0.8, opacity: 0 }}
           animate={isAdding ? {
-            /* ANIMACIÓN DE SUCCIÓN MEJORADA */
-            scale: [1, 1.05, 0],     // Primero crece (pop) y luego desaparece
-            x: [0, -10, 150],       // Un pequeño movimiento opuesto antes de salir disparado
-            y: [0, -10, 600],       // Sube un poco y cae al icono
-            rotate: [0, -10, 25],   // Giro dinámico
+            /* 3. SALIDA: Animación de succión premium */
+            scale: [1, 1.05, 0],
+            x: [0, -10, 150],
+            y: [0, -10, 600],
+            rotate: [0, -10, 25],
             opacity: [1, 1, 0],
             filter: ["blur(0px)", "blur(0px)", "blur(12px)"],
           } : {
             scale: 1,
-            x: 0,
-            y: 0,
-            rotate: 0,
             opacity: 1,
             filter: "blur(0px)"
           }}
           transition={{ 
-            duration: 0.6, 
-            times: [0, 0.2, 1], // El 'pop' ocurre en el primer 20% del tiempo
-            ease: "easeInOut"
+            duration: 0.5, 
+            ease: [0.16, 1, 0.3, 1] // Ease-out suave para la expansión
           }}
           style={{ transformOrigin: "bottom right" }}
           className="flex flex-col w-full h-full"
         >
-          {/* IMAGEN (Sin botón X manual) */}
+          {/* IMAGEN */}
           <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-muted">
             <Image src={product.image} alt={product.name} fill className="object-cover" />
           </div>
@@ -86,7 +80,7 @@ export function ProductModal({ isOpen, onClose, product }: any) {
                   onClick={handleAdd}
                 >
                   <ShoppingBag className="h-5 w-5" />
-                  {isAdding ? "¡A la bolsa!" : "Agregar a mi Pedido"}
+                  {isAdding ? "¡Listo!" : "Agregar a mi Pedido"}
                 </Button>
               ) : (
                 <div className="text-center p-4 bg-zinc-900 rounded-2xl text-zinc-500 font-bold">Agotado</div>
