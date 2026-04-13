@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { ShoppingBag, X, Plus, Minus, Send } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 export interface CartItem {
   id: string
@@ -24,12 +25,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  // 🔴 NUEVO ESTADO PARA LA ANIMACIÓN DEL BOTÓN
-  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // --- SOLUCIÓN AL BLOQUEO DE SCROLL ---
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+    return () => { document.body.style.overflow = "unset" }
+  }, [isOpen])
 
   const addToCart = (product: { id: string; name: string; price: number }) => {
     setCart((prevCart) => {
@@ -41,14 +50,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prevCart, { ...product, quantity: 1 }]
     })
-
-    // 🔴 HACEMOS QUE EL BOTÓN SALTE DURANTE 300 MILISEGUNDOS
-    setIsAnimating(true)
-    setTimeout(() => {
-      setIsAnimating(false)
-    }, 300)
-
-    // (Eliminamos el setIsOpen(true) para que ya no se abra solo)
   }
 
   const removeFromCart = (id: string) => {
@@ -69,13 +70,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const handleWhatsAppCheckout = (phone: string, name: string) => {
     if (cart.length === 0) return
-
     let message = `Hola ${name}! quiero hacer un pedido de BOTA-NA:%0A%0A`
     cart.forEach((item) => {
       message += `▪️ ${item.quantity}x ${item.name} ($${item.price * item.quantity})%0A`
     })
     message += `%0A*Total: $${getTotal()}*%0A%0A¿Dónde nos vemos para la entrega?`
-
     const whatsappUrl = `https://wa.me/${phone}?text=${message}`
     window.open(whatsappUrl, "_blank")
   }
@@ -86,100 +85,131 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, getTotal }}>
       {children}
 
-      {isMounted && totalItems > 0 && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className={`fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all duration-300 ${
-            // 🔴 APLICAMOS LA ANIMACIÓN VISUAL AQUÍ
-            isAnimating
-              ? "scale-125 bg-white text-orange-600 ring-4 ring-orange-500/50"
-              : "scale-100 bg-gradient-to-tr from-orange-500 to-red-600 text-white hover:scale-105 active:scale-95"
-            }`}
-        >
-          <div className="relative">
-            <ShoppingBag className={`h-6 w-6 transition-colors ${isAnimating ? "text-orange-600" : "text-white"}`} />
-
-            {/* Burbuja del contador */}
-            <span className={`absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full font-bold border transition-all duration-300 ${isAnimating
-                ? "bg-orange-500 text-white border-white scale-125"
-                : "bg-black text-white border-white/20 scale-100 text-[10px]"
-              }`}>
-              {totalItems}
-            </span>
-          </div>
-        </button>
-      )}
-
-      {isMounted && isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
-          <div className="relative w-full max-w-md bg-zinc-950 border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 h-full">
-            <div className="flex items-center justify-between border-b border-white/10 p-5">
-              <h2 className="text-xl font-black text-white flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5 text-orange-500" />
-                TU PEDIDO
-              </h2>
-              <button onClick={() => setIsOpen(false)} className="rounded-full p-2 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
-                <X className="h-5 w-5" />
-              </button>
+      {/* BOTÓN FLOTANTE CON ANIMACIÓN SUAVE (Eliminamos el parpadeo raro) */}
+      <AnimatePresence>
+        {isMounted && totalItems > 0 && (
+          <motion.button
+            initial={{ scale: 0, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0, y: 20 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(true)}
+            className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-[oklch(0.55_0.15_45)] text-white shadow-[0_10px_25px_rgba(194,65,12,0.4)] border border-white/10"
+          >
+            <div className="relative">
+              <ShoppingBag className="h-6 w-6" />
+              {/* Contador con animación de "pop" al cambiar el número */}
+              <motion.span 
+                key={totalItems}
+                initial={{ scale: 1.5, bg: "#fff" }}
+                animate={{ scale: 1, bg: "#000" }}
+                className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-black text-white border-2 border-zinc-950 text-[10px] font-black"
+              >
+                {totalItems}
+              </motion.span>
             </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-            <div className="flex-1 overflow-y-auto p-5">
-              {cart.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center text-center opacity-50 text-white">
-                  <ShoppingBag className="h-12 w-12 mb-4" />
-                  <p className="font-bold">Tu carrito está vacío</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between rounded-2xl bg-white/5 p-4 border border-white/5">
+      {/* PANEL LATERAL DEL CARRITO */}
+      <AnimatePresence>
+        {isMounted && isOpen && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+              onClick={() => setIsOpen(false)} 
+            />
+            
+            <motion.div 
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md bg-zinc-950 border-l border-white/5 shadow-2xl flex flex-col h-full"
+            >
+              {/* Header Carrito */}
+              <div className="flex items-center justify-between p-6 border-b border-white/5">
+                <h2 className="text-xl font-black text-white italic tracking-tighter flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-[oklch(0.55_0.15_45)] flex items-center justify-center">
+                    <ShoppingBag className="h-4 w-4 text-white" />
+                  </div>
+                  TU PEDIDO
+                </h2>
+                <button onClick={() => setIsOpen(false)} className="rounded-full p-2 bg-white/5 text-zinc-400 hover:text-white transition-colors">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Lista de Productos */}
+              <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4">
+                {cart.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center text-center opacity-20 text-white">
+                    <ShoppingBag className="h-16 w-16 mb-4" />
+                    <p className="font-black uppercase tracking-widest text-xs">Vacío</p>
+                  </div>
+                ) : (
+                  cart.map((item) => (
+                    <motion.div 
+                      layout
+                      key={item.id} 
+                      className="flex items-center justify-between rounded-[1.5rem] bg-white/5 p-4 border border-white/5"
+                    >
                       <div className="flex-1">
-                        <h3 className="font-bold text-white text-sm">{item.name}</h3>
-                        <p className="text-orange-400 font-bold text-sm">${item.price * item.quantity}</p>
+                        <h3 className="font-black text-white text-sm uppercase tracking-tight">{item.name}</h3>
+                        <p className="text-[oklch(0.55_0.15_45)] font-black text-sm">${item.price * item.quantity}</p>
                       </div>
-                      <div className="flex items-center gap-3 bg-black/40 rounded-full px-2 py-1 border border-white/10">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-white/70 hover:text-white">
+                      
+                      <div className="flex items-center gap-4 bg-black/40 rounded-full px-3 py-1.5 border border-white/10">
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-zinc-500 hover:text-white active:scale-75 transition-all">
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="w-4 text-center text-sm font-bold text-white">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-white/70 hover:text-white">
+                        <span className="w-4 text-center text-sm font-black text-white">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-zinc-500 hover:text-white active:scale-75 transition-all">
                           <Plus className="h-4 w-4" />
                         </button>
                       </div>
-                    </div>
-                  ))}
+                    </motion.div>
+                  ))
+                )}
+              </div>
+
+              {/* Footer Checkout */}
+              <div className="p-6 bg-zinc-900/50 border-t border-white/5 space-y-6">
+                <div className="flex justify-between items-end">
+                  <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Total Estimado</span>
+                  <span className="text-3xl font-black text-white tracking-tighter">${getTotal()}</span>
                 </div>
-              )}
-            </div>
 
-            <div className="border-t border-white/10 p-5 bg-zinc-900">
-              <div className="flex justify-between mb-4">
-                <span className="text-zinc-400 font-bold">Total a pagar:</span>
-                <span className="text-2xl font-black text-white">${getTotal()}</span>
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    onClick={() => handleWhatsAppCheckout("524774950232", "Saúl")}
+                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-white text-black px-6 py-4 font-black italic shadow-xl active:scale-95 transition-all"
+                  >
+                    <Send className="h-5 w-5" />
+                    PEDIR A SAÚL
+                  </button>
+
+                  <button
+                    onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")}
+                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-zinc-800 text-white px-6 py-4 font-black italic border border-white/5 active:scale-95 transition-all"
+                  >
+                    <Send className="h-5 w-5" />
+                    PEDIR A ARANZA
+                  </button>
+                </div>
+                
+                <p className="text-[9px] text-center text-zinc-600 font-bold uppercase tracking-[0.3em]">
+                  León, Gto. • Entrega Personal
+                </p>
               </div>
-
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => handleWhatsAppCheckout("524774950232", "Saúl")}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-4 font-black shadow-lg transition-transform hover:scale-[1.02] active:scale-95"
-                >
-                  <Send className="h-5 w-5" />
-                  PEDIR A SAÚL
-                </button>
-
-                <button
-                  onClick={() => handleWhatsAppCheckout("524761004512", "Aranza")}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-4 font-black shadow-lg shadow-[#25D366]/20 transition-transform hover:scale-[1.02] active:scale-95"
-                >
-                  <Send className="h-5 w-5" />
-                  PEDIR A ARANZA
-                </button>
-              </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </CartContext.Provider>
   )
 }
