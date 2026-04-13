@@ -1,15 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Instagram, Wallet, Check, Gift } from "lucide-react"
+import { X, Instagram, Wallet, Check, Gift, Ticket } from "lucide-react"
 
 export function LoyaltyWallet({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-  const [step, setStep] = useState(1) // 1: Registro, 2: Puntos
+  const [step, setStep] = useState(1) // 1: Registro/IG, 2: Puntos y Canje
   const [instagram, setInstagram] = useState("")
+  const [purchaseCode, setPurchaseCode] = useState("")
+  
+  // Tu lógica original de puntos (ejemplo con 3 puntos)
+  const [points, setPoints] = useState(3)
 
-  // Simulamos que tiene 3 puntos de 10
-  const points = 3 
+  const handleApplyCode = () => {
+    // Aquí va tu lógica de validación de códigos (ej. el que le das con su compra)
+    if (purchaseCode.length > 0) {
+      console.log("Validando código:", purchaseCode)
+      // setPoints(prev => prev + 1)
+      setPurchaseCode("")
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -29,7 +39,7 @@ export function LoyaltyWallet({ isOpen, onClose }: { isOpen: boolean, onClose: (
             exit={{ scale: 0.9, opacity: 0 }}
             className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-white/10 shadow-2xl"
           >
-            {/* HEADER DE LA TARJETA */}
+            {/* HEADER FIJO */}
             <div className="bg-[oklch(0.55_0.15_45)] p-6 text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Wallet className="h-5 w-5" />
@@ -40,21 +50,23 @@ export function LoyaltyWallet({ isOpen, onClose }: { isOpen: boolean, onClose: (
               </button>
             </div>
 
-            {/* CUERPO CON ALTURA FIJA (400px para que quepan bien los 10 espacios) */}
-            <div className="h-[400px] p-8 flex flex-col justify-center">
+            {/* CONTENEDOR CON TAMAÑO FIJO (Para evitar el salto de tamaño) */}
+            <div className="h-[500px] p-8 flex flex-col justify-center no-scrollbar overflow-y-auto">
               <AnimatePresence mode="wait">
                 {step === 1 ? (
-                  /* PASO 1: SEGUIR IG Y REGISTRO */
+                  /* PANTALLA 1: IG Y REGISTRO */
                   <motion.div
                     key="step1"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="space-y-6 text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-6"
                   >
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">¡Activa tu BotaCard!</h3>
-                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Paso 1: Síguenos en Instagram</p>
+                    <div className="text-center space-y-2">
+                      <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">¡Bienvenido al Club!</h3>
+                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
+                        SÍGUENOS EN INSTAGRAM <br /> Y ACTIVA TU TARJETA
+                      </p>
                     </div>
 
                     <a 
@@ -66,45 +78,48 @@ export function LoyaltyWallet({ isOpen, onClose }: { isOpen: boolean, onClose: (
                       @BOTA.NA.MX
                     </a>
 
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Tu usuario de IG"
-                        value={instagram}
-                        onChange={(e) => setInstagram(e.target.value)}
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 px-4 text-center text-sm font-bold text-white focus:outline-none focus:border-[oklch(0.55_0.15_45)] transition-all"
-                      />
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-zinc-600 uppercase ml-2 tracking-widest">Tu usuario</label>
+                        <input
+                          type="text"
+                          placeholder="@tu_usuario"
+                          value={instagram}
+                          onChange={(e) => setInstagram(e.target.value)}
+                          className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 px-4 text-sm font-bold text-white focus:outline-none focus:border-[oklch(0.55_0.15_45)]"
+                        />
+                      </div>
                       <button
                         onClick={() => instagram && setStep(2)}
-                        className="w-full rounded-2xl bg-white py-4 text-sm font-black uppercase text-black active:scale-95 transition-transform shadow-lg"
+                        className="w-full rounded-2xl bg-white py-4 text-sm font-black uppercase text-black active:scale-95 transition-transform"
                       >
-                        Ver mis puntos
+                        Ingresar
                       </button>
                     </div>
                   </motion.div>
                 ) : (
-                  /* PASO 2: LOS 10 ESPACIOS */
+                  /* PANTALLA 2: PUNTOS E INPUT DE CÓDIGO (RESTAURADA) */
                   <motion.div
                     key="step2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     className="space-y-6"
                   >
                     <div className="text-center">
-                      <p className="text-[10px] font-black text-[oklch(0.55_0.15_45)] uppercase tracking-[0.2em]">@{instagram}</p>
-                      <h3 className="text-lg font-black text-white uppercase italic tracking-tighter">Tu Progreso</h3>
+                      <p className="text-[10px] font-black text-[oklch(0.55_0.15_45)] uppercase tracking-widest">@{instagram}</p>
+                      <h3 className="text-lg font-black text-white uppercase italic">Tus Puntos</h3>
                     </div>
 
-                    {/* GRID DE 10 ESPACIOS */}
-                    <div className="grid grid-cols-5 gap-3">
+                    {/* LOS 10 ESPACIOS */}
+                    <div className="grid grid-cols-5 gap-3 bg-white/5 p-4 rounded-3xl border border-white/5">
                       {[...Array(10)].map((_, i) => (
                         <div 
                           key={i} 
                           className={`aspect-square rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
                             i < points 
-                              ? "bg-[oklch(0.55_0.15_45)] border-[oklch(0.55_0.15_45)] shadow-[0_0_10px_rgba(194,65,12,0.4)]" 
-                              : "bg-white/5 border-white/10"
+                              ? "bg-[oklch(0.55_0.15_45)] border-[oklch(0.55_0.15_45)]" 
+                              : "bg-black/20 border-white/10"
                           }`}
                         >
                           {i < points ? (
@@ -112,32 +127,39 @@ export function LoyaltyWallet({ isOpen, onClose }: { isOpen: boolean, onClose: (
                           ) : i === 9 ? (
                             <Gift className="h-4 w-4 text-zinc-700" />
                           ) : (
-                            <span className="text-[10px] font-black text-zinc-700">{i + 1}</span>
+                            <span className="text-[9px] font-black text-zinc-800">{i + 1}</span>
                           )}
                         </div>
                       ))}
                     </div>
 
-                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
-                        ¡Llega a 10 y obtén <br /> <span className="text-white">un producto gratis!</span>
-                      </p>
+                    {/* EL INPUT DEL CÓDIGO QUE TE HABÍA QUITADO */}
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                        <input
+                          type="text"
+                          placeholder="Ingresa código de compra"
+                          value={purchaseCode}
+                          onChange={(e) => setPurchaseCode(e.target.value)}
+                          className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[oklch(0.55_0.15_45)] placeholder:text-zinc-700"
+                        />
+                      </div>
+                      <button
+                        onClick={handleApplyCode}
+                        className="w-full rounded-2xl bg-[oklch(0.55_0.15_45)] py-4 text-sm font-black uppercase text-white shadow-lg shadow-orange-950/20 active:scale-95 transition-transform"
+                      >
+                        Canjear Código
+                      </button>
                     </div>
 
-                    <button 
-                      onClick={() => setStep(1)}
-                      className="w-full text-[9px] font-black text-zinc-600 uppercase tracking-widest hover:text-zinc-400 transition-colors"
-                    >
-                      Cerrar Sesión
-                    </button>
+                    <p className="text-[9px] text-center text-zinc-600 font-bold uppercase tracking-[0.2em] px-4">
+                      Al llegar a 10 puntos obtienes un producto gratis. <br />
+                      <span className="text-zinc-500 underline mt-2 inline-block cursor-pointer" onClick={() => setStep(1)}>Cerrar Sesión</span>
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-
-            {/* Footer de la tarjeta */}
-            <div className="p-4 bg-zinc-800/20 text-center border-t border-white/5">
-               <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em]">BOTA-NA Industrial Snacks</p>
             </div>
           </motion.div>
         </div>
