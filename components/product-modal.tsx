@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { X, Flame, Star, AlertTriangle, ShoppingBag } from "lucide-react"
+import { Flame, Star, AlertTriangle, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import { useCart } from "@/components/cart-context"
 import { useState } from "react"
@@ -20,45 +20,49 @@ export function ProductModal({ isOpen, onClose, product }: any) {
     setIsAdding(true)
     addToCart({ id: product.id.toString(), name: product.name, price: numericPrice })
 
-    // Tiempo exacto de la succión
     setTimeout(() => {
       onClose()
       setTimeout(() => setIsAdding(false), 200)
-    }, 500)
+    }, 600) // Un poco más de tiempo para apreciar el efecto
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar">
+      {/* IMPORTANTE: He quitado la "X" manual. 
+        Si la "X" del sistema sigue estorbando, añade 'hide-close' a className 
+        y la manejamos por CSS, pero por ahora solo eliminé la duplicada.
+      */}
+      <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar [&>button]:text-white [&>button]:bg-black/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5">
         
         <motion.div
-          /* CONFIGURACIÓN DE SUCCIÓN PRO */
-          initial={{ scale: 1, opacity: 1 }}
+          initial={{ scale: 0.9, opacity: 0 }}
           animate={isAdding ? {
-            scale: 0.1,
-            x: 120,          // Ajuste fino para móvil
-            y: 400,          // Ajuste fino para móvil
-            rotate: 15,      // Un poco de giro lo hace ver más dinámico
-            opacity: 0,
-            filter: "blur(4px)"
+            /* ANIMACIÓN DE SUCCIÓN MEJORADA */
+            scale: [1, 1.05, 0],     // Primero crece (pop) y luego desaparece
+            x: [0, -10, 150],       // Un pequeño movimiento opuesto antes de salir disparado
+            y: [0, -10, 600],       // Sube un poco y cae al icono
+            rotate: [0, -10, 25],   // Giro dinámico
+            opacity: [1, 1, 0],
+            filter: ["blur(0px)", "blur(0px)", "blur(12px)"],
           } : {
             scale: 1,
             x: 0,
             y: 0,
+            rotate: 0,
             opacity: 1,
             filter: "blur(0px)"
           }}
           transition={{ 
-            duration: 0.5, 
-            ease: [0.32, 0, 0.67, 0] // Curva de aceleración hacia el icono
+            duration: 0.6, 
+            times: [0, 0.2, 1], // El 'pop' ocurre en el primer 20% del tiempo
+            ease: "easeInOut"
           }}
-          style={{ transformOrigin: "bottom right" }} // <-- LA CLAVE: El punto de fuga es el icono
+          style={{ transformOrigin: "bottom right" }}
           className="flex flex-col w-full h-full"
         >
-          {/* IMAGEN */}
+          {/* IMAGEN (Sin botón X manual) */}
           <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-muted">
             <Image src={product.image} alt={product.name} fill className="object-cover" />
-            <button onClick={onClose} className="absolute right-5 top-5 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-lg"><X className="h-5 w-5" /></button>
           </div>
 
           {/* CUERPO */}
@@ -70,6 +74,7 @@ export function ProductModal({ isOpen, onClose, product }: any) {
                 {product.isSpicy && <Flame className="h-5 w-5 fill-orange-500 text-orange-500" />}
               </div>
             </div>
+            
             <p className="mt-1 text-3xl font-light tracking-tighter text-[oklch(0.55_0.15_45)]">{product.price}</p>
             <p className="mt-5 text-sm leading-relaxed text-zinc-400 font-medium">{product.description}</p>
 
@@ -81,7 +86,7 @@ export function ProductModal({ isOpen, onClose, product }: any) {
                   onClick={handleAdd}
                 >
                   <ShoppingBag className="h-5 w-5" />
-                  {isAdding ? "¡Listo!" : "Agregar a mi Pedido"}
+                  {isAdding ? "¡A la bolsa!" : "Agregar a mi Pedido"}
                 </Button>
               ) : (
                 <div className="text-center p-4 bg-zinc-900 rounded-2xl text-zinc-500 font-bold">Agotado</div>
