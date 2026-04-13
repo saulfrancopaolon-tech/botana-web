@@ -20,11 +20,11 @@ export function ProductModal({ isOpen, onClose, product }: any) {
     setIsAdding(true)
     addToCart({ id: product.id.toString(), name: product.name, price: numericPrice })
 
-    // Reducimos un poco el tiempo para que se sienta más "eléctrica" la succión
+    // Succión ultra rápida (400ms) para que sea eléctrica
     setTimeout(() => {
       onClose()
-      setTimeout(() => setIsAdding(false), 150)
-    }, 500) 
+      setTimeout(() => setIsAdding(false), 100)
+    }, 400) 
   }
 
   return (
@@ -32,30 +32,28 @@ export function ProductModal({ isOpen, onClose, product }: any) {
       <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar [&>button]:text-white [&>button]:bg-black/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5">
         
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          /* ENTRADA NÍTIDA: Sin blur, solo escala y opacidad */
+          initial={{ scale: 0.85, opacity: 0 }}
           animate={isAdding ? {
-            /* ANIMACIÓN DE ABSORCIÓN "STRETCH" */
-            scaleX: [1, 1.05, 0.2, 0], // Se ensancha y luego se comprime
-            scaleY: [1, 0.95, 1.5, 0], // Se achata y luego se estira (efecto liga)
-            x: [0, -20, 180],          // Toma impulso a la izquierda y sale disparado a la derecha
-            y: [0, -30, 700],          // Sube un poco (anticipación) y cae al icono
-            rotate: [0, -5, 15],       // Giro mínimo para realismo
-            opacity: [1, 1, 0.8, 0],
-            filter: ["blur(0px)", "blur(0px)", "blur(2px)", "blur(8px)"], // Blur progresivo al final
+            /* SUCCIÓN ELÉCTRICA: Basada en estiramiento, no en blur */
+            scaleX: [1, 1.1, 0.1, 0],
+            scaleY: [1, 0.9, 1.8, 0], // El estiramiento (1.8) da la sensación de velocidad
+            x: [0, -15, 200], 
+            y: [0, -20, 800], 
+            rotate: [0, -8, 12],
+            opacity: [1, 1, 0.5, 0],
+            filter: "blur(0px)", // Forzamos a que NO haya blur durante la succión
           } : {
             scale: 1,
-            scaleX: 1,
-            scaleY: 1,
+            opacity: 1,
             x: 0,
             y: 0,
             rotate: 0,
-            opacity: 1,
-            filter: "blur(0px)"
+            filter: "blur(0px)" // Forzamos nitidez total
           }}
           transition={{ 
-            duration: 0.5, 
-            times: [0, 0.2, 0.5, 1], // El estiramiento máximo ocurre a mitad de camino
-            ease: [0.34, 1.56, 0.64, 1] // Una curva tipo "Back" para el rebote inicial
+            duration: 0.45, 
+            ease: [0.23, 1, 0.32, 1] // Curva de velocidad constante y rápida al final
           }}
           style={{ transformOrigin: "bottom right" }}
           className="flex flex-col w-full h-full"
@@ -86,7 +84,7 @@ export function ProductModal({ isOpen, onClose, product }: any) {
                   onClick={handleAdd}
                 >
                   <ShoppingBag className="h-5 w-5" />
-                  {isAdding ? "¡Bebé en camino!" : "Agregar a mi Pedido"}
+                  {isAdding ? "¡Agregado!" : "Agregar a mi Pedido"}
                 </Button>
               ) : (
                 <div className="text-center p-4 bg-zinc-900 rounded-2xl text-zinc-500 font-bold">Agotado</div>
