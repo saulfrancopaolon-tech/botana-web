@@ -65,7 +65,7 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
             <div className="flex flex-col items-center gap-4">
               {/* UBICACIÓN Y TAG */}
               <p className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
-                <MapPin className="h-3 w-3 text-red-500" />
+                <MapPin className="h-3 w-3 text-zinc-700" />
                 Leon Gto.
                 <span className="mx-1 h-1 w-1 rounded-full bg-zinc-700" />
                 Snacks Premium
@@ -79,7 +79,7 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
                   rel="noopener noreferrer" 
                   className="group flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[11px] font-black tracking-widest text-white hover:bg-white/10 transition-all"
                 >
-                  <Instagram className="h-3.5 w-3.5 text-pink-500" />
+                  <Instagram className="h-3.5 w-3.5 text-zinc-700" />
                   <span>INSTAGRAM</span>
                 </a>
                 
