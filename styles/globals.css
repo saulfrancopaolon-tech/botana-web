@@ -6,89 +6,26 @@
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 1rem; /* Radio más amplio para ese look moderno */
+  --primary: oklch(0.55 0.15 45); /* Cobre Industrial */
+  --radius: 1rem;
 }
 
 .dark {
-  --background: oklch(0.12 0 0); /* Un negro un pelín más suave para el look industrial */
+  --background: oklch(0.12 0 0); 
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.55 0.15 45); /* Cobre Industrial */
   --border: oklch(0.2 0 0);
-  --input: oklch(0.2 0 0);
-  --ring: oklch(0.439 0 0);
-}
-
-@theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-border: var(--border);
-  --radius-lg: var(--radius);
 }
 
 @layer base {
-  * {
-    @apply border-border transition-colors duration-200; /* Transiciones suaves en todo */
+  * { @apply border-border transition-colors duration-200; }
+  body { 
+    @apply bg-background text-foreground antialiased selection:bg-[oklch(0.55_0.15_45)] selection:text-white; 
   }
-
-  body {
-    @apply bg-background text-foreground antialiased selection:bg-orange-500 selection:text-white;
-    font-feature-settings: "ss01", "ss03", "cv08", "cv11"; /* Optimización tipográfica de Geist */
-  }
-
-  /* Ocultar scrollbar pero mantener funcionalidad (Para el menú de categorías) */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  
+  /* Ocultar scrollbar en toda la web */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-/* --- TOQUES FINALES DE DISEÑO INDUSTRIAL --- */
-
-/* Suavizado de imágenes para que no brillen tanto en Dark Mode */
-.dark img {
-  filter: brightness(.9) contrast(1.1);
-}
-
-/* Efecto de cristal esmerilado premium */
-.glass {
-  @apply bg-zinc-950/70 backdrop-blur-xl border border-white/10;
-}
-
-/* Ajuste de scroll general suave */
-html {
-  scroll-behavior: smooth;
-}
+.glass { @apply bg-zinc-950/70 backdrop-blur-xl border border-white/10; }
