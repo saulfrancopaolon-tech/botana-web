@@ -21,17 +21,17 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
     <>
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-zinc-950/90 py-4 text-center backdrop-blur-2xl">
         
-        {/* BOTÓN MENÚ (IZQUIERDA) */}
+        {/* 1. BOTÓN MENÚ LATERAL (IZQUIERDA) */}
         <div className="absolute top-3 left-4">
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
+            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90 shadow-lg"
           >
             <Menu className="h-5 w-5" />
           </button>
         </div>
 
-        {/* BOTÓN MAYOREO (DERECHA) */}
+        {/* 2. BOTÓN MAYOREO (DERECHA) */}
         <div className="absolute top-3 right-4">
           <button
             onClick={() => setIsWholesaleOpen(true)}
@@ -46,20 +46,24 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
           </button>
         </div>
 
+        {/* 3. CONTENIDO CENTRAL (LOGO Y BOTONES) */}
         <div className="container mx-auto px-4 mt-6">
           <div className="flex flex-col items-center gap-6">
+            
+            {/* LOGO REDISEÑADO */}
             <div className="flex justify-center transition-transform duration-500 hover:scale-105">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Orange%20and%20White%20Playful%20Food%20Logo%20%28US%20carta%29%20%282%29-1qMpbsYrPr8DZdxCCQEIDgFFo7CTy5.png"
+                src="/images/logo-botana.png" // Tu nueva imagen local recortada
                 alt="BOTA-NA Logo"
-                width={120}
-                height={100}
-                className="h-auto w-24 invert sm:w-28"
+                width={200} // Lo subimos para que destaque
+                height={120}
+                className="h-auto w-36 invert sm:w-48" // w-36 en móvil, w-48 en desktop
                 priority
               />
             </div>
 
             <div className="flex flex-col items-center gap-4">
+              {/* UBICACIÓN Y TAG */}
               <p className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
                 <MapPin className="h-3 w-3 text-red-500" />
                 Leon Gto.
@@ -67,12 +71,22 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
                 Snacks Premium
               </p>
 
+              {/* BOTONES DE ACCIÓN RÁPIDA */}
               <div className="flex gap-3">
-                <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[11px] font-black tracking-widest text-white hover:bg-white/10 transition-all">
-                  <Instagram className="h-3.5 w-3.5" />
+                <a 
+                  href="https://instagram.com/bota.na.mx" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[11px] font-black tracking-widest text-white hover:bg-white/10 transition-all"
+                >
+                  <Instagram className="h-3.5 w-3.5 text-pink-500" />
                   <span>INSTAGRAM</span>
                 </a>
-                <button onClick={() => setIsWalletOpen(true)} className="group flex items-center gap-2 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 px-4 py-2 text-[11px] font-black tracking-widest text-white shadow-lg active:scale-95 transition-all">
+                
+                <button 
+                  onClick={() => setIsWalletOpen(true)} 
+                  className="group flex items-center gap-2 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 px-4 py-2 text-[11px] font-black tracking-widest text-white shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+                >
                   <Wallet className="h-3.5 w-3.5 text-white" />
                   <span>MI TARJETA</span>
                 </button>
@@ -82,6 +96,8 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
         </div>
       </header>
 
+      {/* --- MODALES Y MENÚS LATERALES --- */}
+      
       <MobileMenu 
         isOpen={isMenuOpen} 
         onClose={() => setIsMenuOpen(false)}
@@ -90,8 +106,15 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
         categories={categories}
       />
 
-      <LoyaltyWallet isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} />
-      <WholesaleModal isOpen={isWholesaleOpen} onClose={() => setIsWholesaleOpen(false)} />
+      <LoyaltyWallet 
+        isOpen={isWalletOpen} 
+        onClose={() => setIsWalletOpen(false)} 
+      />
+
+      <WholesaleModal 
+        isOpen={isWholesaleOpen} 
+        onClose={() => setIsWholesaleOpen(false)} 
+      />
     </>
   )
 }
