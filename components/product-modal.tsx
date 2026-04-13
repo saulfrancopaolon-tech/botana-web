@@ -20,36 +20,42 @@ export function ProductModal({ isOpen, onClose, product }: any) {
     setIsAdding(true)
     addToCart({ id: product.id.toString(), name: product.name, price: numericPrice })
 
+    // Reducimos un poco el tiempo para que se sienta más "eléctrica" la succión
     setTimeout(() => {
       onClose()
-      setTimeout(() => setIsAdding(false), 200)
-    }, 600) 
+      setTimeout(() => setIsAdding(false), 150)
+    }, 500) 
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* 1. LIMPIEZA: Quitamos las clases de animación de Tailwind para evitar conflictos */}
       <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar [&>button]:text-white [&>button]:bg-black/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5">
         
         <motion.div
-          /* 2. ENTRADA: Animación de expansión limpia */
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.9, opacity: 0 }}
           animate={isAdding ? {
-            /* 3. SALIDA: Animación de succión premium */
-            scale: [1, 1.05, 0],
-            x: [0, -10, 150],
-            y: [0, -10, 600],
-            rotate: [0, -10, 25],
-            opacity: [1, 1, 0],
-            filter: ["blur(0px)", "blur(0px)", "blur(12px)"],
+            /* ANIMACIÓN DE ABSORCIÓN "STRETCH" */
+            scaleX: [1, 1.05, 0.2, 0], // Se ensancha y luego se comprime
+            scaleY: [1, 0.95, 1.5, 0], // Se achata y luego se estira (efecto liga)
+            x: [0, -20, 180],          // Toma impulso a la izquierda y sale disparado a la derecha
+            y: [0, -30, 700],          // Sube un poco (anticipación) y cae al icono
+            rotate: [0, -5, 15],       // Giro mínimo para realismo
+            opacity: [1, 1, 0.8, 0],
+            filter: ["blur(0px)", "blur(0px)", "blur(2px)", "blur(8px)"], // Blur progresivo al final
           } : {
             scale: 1,
+            scaleX: 1,
+            scaleY: 1,
+            x: 0,
+            y: 0,
+            rotate: 0,
             opacity: 1,
             filter: "blur(0px)"
           }}
           transition={{ 
             duration: 0.5, 
-            ease: [0.16, 1, 0.3, 1] // Ease-out suave para la expansión
+            times: [0, 0.2, 0.5, 1], // El estiramiento máximo ocurre a mitad de camino
+            ease: [0.34, 1.56, 0.64, 1] // Una curva tipo "Back" para el rebote inicial
           }}
           style={{ transformOrigin: "bottom right" }}
           className="flex flex-col w-full h-full"
@@ -80,7 +86,7 @@ export function ProductModal({ isOpen, onClose, product }: any) {
                   onClick={handleAdd}
                 >
                   <ShoppingBag className="h-5 w-5" />
-                  {isAdding ? "¡Listo!" : "Agregar a mi Pedido"}
+                  {isAdding ? "¡Bebé en camino!" : "Agregar a mi Pedido"}
                 </Button>
               ) : (
                 <div className="text-center p-4 bg-zinc-900 rounded-2xl text-zinc-500 font-bold">Agotado</div>
