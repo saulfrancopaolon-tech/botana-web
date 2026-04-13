@@ -20,11 +20,11 @@ export function ProductModal({ isOpen, onClose, product }: any) {
     setIsAdding(true)
     addToCart({ id: product.id.toString(), name: product.name, price: numericPrice })
 
-    // Succión ultra rápida (400ms) para que sea eléctrica
+    // Animación ultra rápida (350ms) para que se sienta instantánea
     setTimeout(() => {
       onClose()
       setTimeout(() => setIsAdding(false), 100)
-    }, 400) 
+    }, 350) 
   }
 
   return (
@@ -32,30 +32,27 @@ export function ProductModal({ isOpen, onClose, product }: any) {
       <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar [&>button]:text-white [&>button]:bg-black/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5">
         
         <motion.div
-          /* ENTRADA NÍTIDA: Sin blur, solo escala y opacidad */
+          /* ENTRADA: Expansión limpia desde 0.85 */
           initial={{ scale: 0.85, opacity: 0 }}
           animate={isAdding ? {
-            /* SUCCIÓN ELÉCTRICA: Basada en estiramiento, no en blur */
-            scaleX: [1, 1.1, 0.1, 0],
-            scaleY: [1, 0.9, 1.8, 0], // El estiramiento (1.8) da la sensación de velocidad
-            x: [0, -15, 200], 
-            y: [0, -20, 800], 
-            rotate: [0, -8, 12],
-            opacity: [1, 1, 0.5, 0],
-            filter: "blur(0px)", // Forzamos a que NO haya blur durante la succión
+            /* SALIDA: Encogimiento rápido al icono */
+            scale: [1, 1.05, 0],      // "Pop" inicial y luego desaparece a 0
+            x: [0, 0, 150],           // Viaja a la derecha
+            y: [0, 0, 450],           // Viaja hacia abajo (al icono)
+            opacity: [1, 1, 0],
+            filter: "blur(0px)",      // Cero blur para máxima fluidez
           } : {
             scale: 1,
             opacity: 1,
             x: 0,
             y: 0,
-            rotate: 0,
-            filter: "blur(0px)" // Forzamos nitidez total
+            filter: "blur(0px)"
           }}
           transition={{ 
-            duration: 0.45, 
-            ease: [0.23, 1, 0.32, 1] // Curva de velocidad constante y rápida al final
+            duration: 0.35,           // Bajamos el tiempo para que sea "eléctrica"
+            ease: [0.32, 0, 0.67, 0]  // Curva de aceleración pura (Ease-In)
           }}
-          style={{ transformOrigin: "bottom right" }}
+          style={{ transformOrigin: "bottom right" }} // El punto de fuga es la esquina inferior derecha
           className="flex flex-col w-full h-full"
         >
           {/* IMAGEN */}
@@ -63,7 +60,7 @@ export function ProductModal({ isOpen, onClose, product }: any) {
             <Image src={product.image} alt={product.name} fill className="object-cover" />
           </div>
 
-          {/* CUERPO */}
+          {/* CUERPO DEL MODAL */}
           <div className="flex flex-col p-8 pt-6 bg-zinc-950/80">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-2xl font-black tracking-tight text-white">{product.name}</DialogTitle>
@@ -90,6 +87,10 @@ export function ProductModal({ isOpen, onClose, product }: any) {
                 <div className="text-center p-4 bg-zinc-900 rounded-2xl text-zinc-500 font-bold">Agotado</div>
               )}
             </div>
+
+            <p className="mt-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] opacity-30 text-white">
+              BOTA-NA • León, Gto.
+            </p>
           </div>
         </motion.div>
       </DialogContent>
