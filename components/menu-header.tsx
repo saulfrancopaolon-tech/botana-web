@@ -57,7 +57,7 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
                 alt="BOTA-NA Logo"
                 width={200} // Lo subimos para que destaque
                 height={120}
-                className="h-auto w-36 invert sm:w-48" // w-36 en móvil, w-48 en desktop
+                className="h-auto w-36 sm:w-48" // w-36 en móvil, w-48 en desktop
                 priority
               />
             </div>
