@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { X, LayoutGrid, Store, Info, HelpCircle, Instagram, MessageCircle, ChevronRight } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react" // <-- AQUÍ ESTABA EL ERROR (faltaba useState)
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -13,8 +13,10 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale, categories }: MobileMenuProps) {
-  
-  // BLOQUEO DE SCROLL TRASERO: Evita que la página principal se mueva al usar el menú
+  // Estado para abrir/cerrar la sección de categorías
+  const [isProductsOpen, setIsProductsOpen] = useState(true)
+
+  // BLOQUEO DE SCROLL TRASERO
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
@@ -38,7 +40,6 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop (Fondo oscuro) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -47,7 +48,6 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
             className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md"
           />
 
-          {/* Menú Deslizable */}
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
@@ -55,7 +55,6 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-y-0 left-0 z-[120] w-[300px] bg-zinc-950 border-r border-white/5 p-6 flex flex-col shadow-2xl"
           >
-            {/* Header del Menú */}
             <div className="flex items-center justify-between mb-10">
               <div className="flex items-center gap-2">
                  <div className="h-8 w-8 rounded-lg bg-[oklch(0.55_0.15_45)] flex items-center justify-center font-black text-white italic">B</div>
@@ -66,30 +65,41 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
               </button>
             </div>
 
-            {/* Cuerpo del Menú con Scroll Invisible */}
             <div className="flex-grow overflow-y-auto no-scrollbar space-y-8 pr-2">
-              
-              {/* Categorías */}
               <div>
-                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4">Menú de Snacks</p>
-                <div className="space-y-1">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => { onCategorySelect(cat); onClose(); }}
-                      className="flex w-full items-center justify-between px-4 py-3 rounded-xl text-sm font-bold text-zinc-400 hover:bg-white/5 hover:text-white transition-all group"
+                <button 
+                  onClick={() => setIsProductsOpen(!isProductsOpen)}
+                  className="flex w-full items-center justify-between text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4"
+                >
+                  Menú de Snacks
+                  <ChevronRight className={`h-3 w-3 transition-transform ${isProductsOpen ? "rotate-90" : ""}`} />
+                </button>
+                
+                <AnimatePresence>
+                  {isProductsOpen && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="space-y-1 overflow-hidden"
                     >
-                      <div className="flex items-center gap-3">
-                        <LayoutGrid className="h-4 w-4 text-[oklch(0.55_0.15_45)]/50 group-hover:text-[oklch(0.55_0.15_45)]" />
-                        {cat}
-                      </div>
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all" />
-                    </button>
-                  ))}
-                </div>
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => { onCategorySelect(cat); onClose(); }}
+                          className="flex w-full items-center justify-between px-4 py-3 rounded-xl text-sm font-bold text-zinc-400 hover:bg-white/5 hover:text-white transition-all group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <LayoutGrid className="h-4 w-4 text-[oklch(0.55_0.15_45)]/50 group-hover:text-[oklch(0.55_0.15_45)]" />
+                            {cat}
+                          </div>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {/* Sección de Negocio */}
               <div className="pt-4 border-t border-white/5">
                 <button 
                   onClick={() => { onOpenWholesale(); onClose(); }}
@@ -100,7 +110,6 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
                 </button>
               </div>
 
-              {/* Información Adicional */}
               <div className="pt-4 border-t border-white/5">
                 <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4">Sobre nosotros</p>
                 <div className="space-y-1">
@@ -114,7 +123,6 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
               </div>
             </div>
 
-            {/* Redes Sociales en el Footer */}
             <div className="mt-auto pt-6 border-t border-white/5">
               <div className="flex items-center justify-between text-zinc-600">
                 <div className="flex gap-4">
@@ -128,7 +136,7 @@ export function MobileMenu({ isOpen, onClose, onCategorySelect, onOpenWholesale,
                 <span className="text-[9px] font-black uppercase tracking-widest">León, Gto. 2026</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>
