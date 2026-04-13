@@ -3,29 +3,70 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* --- VARIABLES DE MARCA (OKLCH) --- */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.15 45); /* Cobre Industrial */
+  --primary: oklch(0.55 0.15 45); /* Cobre Industrial Premium */
   --radius: 1rem;
 }
 
 .dark {
-  --background: oklch(0.12 0 0); 
+  --background: oklch(0.12 0 0); /* Negro Industrial Suave */
   --foreground: oklch(0.985 0 0);
-  --primary: oklch(0.55 0.15 45); /* Cobre Industrial */
+  --primary: oklch(0.55 0.15 45); 
   --border: oklch(0.2 0 0);
+  --ring: oklch(0.55 0.15 45);
 }
 
-@layer base {
-  * { @apply border-border transition-colors duration-200; }
-  body { 
-    @apply bg-background text-foreground antialiased selection:bg-[oklch(0.55_0.15_45)] selection:text-white; 
+/* --- UTILIDADES DE LIMPIEZA VISUAL --- */
+@layer utilities {
+  /* Elimina indicadores de scroll en Chrome, Safari y Firefox */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
   
-  /* Ocultar scrollbar en toda la web */
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar {
+    -ms-overflow-style: none !important; /* IE y Edge */
+    scrollbar-width: none !important; /* Firefox */
+    -webkit-overflow-scrolling: touch; /* Scroll fluido en iOS */
+  }
+
+  /* Efecto de cristal esmerilado */
+  .glass {
+    @apply bg-zinc-950/70 backdrop-blur-xl border border-white/10;
+  }
 }
 
-.glass { @apply bg-zinc-950/70 backdrop-blur-xl border border-white/10; }
+/* --- ESTILOS BASE --- */
+@layer base {
+  * { 
+    @apply border-border transition-colors duration-200; 
+  }
+
+  body { 
+    @apply bg-background text-foreground antialiased;
+    /* Color de selección de texto personalizado */
+    @apply selection:bg-[oklch(0.55_0.15_45)] selection:text-white;
+    
+    /* Opcional: Ocultar scroll general de la página para look de App */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* --- OPTIMIZACIONES EXTRAS --- */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Evita destellos blancos en imágenes cargando en modo oscuro */
+.dark img {
+  filter: brightness(.9) contrast(1.1);
+}
