@@ -85,7 +85,7 @@ export function MenuHeader({ categories, onCategoryChange }: MenuHeaderProps) {
                 
                 <button 
                   onClick={() => setIsWalletOpen(true)} 
-                  className="group flex items-center gap-2 rounded-full bg-gradient-to-tr from-orange-250 to-red-250 px-4 py-2 text-[11px] font-black tracking-widest text-white shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+                  className="group flex items-center gap-2 rounded-full bg-gradient-to-tr from-orange-400 to-red-450 px-4 py-2 text-[11px] font-black tracking-widest text-white shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
                 >
                   <Wallet className="h-3.5 w-3.5 text-white" />
                   <span>MI TARJETA</span>
