@@ -3,70 +3,61 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* --- VARIABLES DE MARCA (OKLCH) --- */
+/* --- VARIABLES DE MARCA --- */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.15 45); /* Cobre Industrial Premium */
+  --primary: oklch(0.55 0.15 45); 
   --radius: 1rem;
 }
 
 .dark {
-  --background: oklch(0.12 0 0); /* Negro Industrial Suave */
+  --background: oklch(0.12 0 0); 
   --foreground: oklch(0.985 0 0);
   --primary: oklch(0.55 0.15 45); 
   --border: oklch(0.2 0 0);
-  --ring: oklch(0.55 0.15 45);
 }
 
-/* --- UTILIDADES DE LIMPIEZA VISUAL --- */
+/* --- UTILIDADES: ELIMINACIÓN TOTAL DE SCROLLBARS --- */
 @layer utilities {
-  /* Elimina indicadores de scroll en Chrome, Safari y Firefox */
+  .no-scrollbar {
+    /* Firefox */
+    scrollbar-width: none !important;
+    /* IE y Edge */
+    -ms-overflow-style: none !important;
+    /* iOS y Chrome Mobile (Evita que aparezca al mover) */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Chrome, Safari y Opera (Incluso en movimiento) */
   .no-scrollbar::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
-  }
-  
-  .no-scrollbar {
-    -ms-overflow-style: none !important; /* IE y Edge */
-    scrollbar-width: none !important; /* Firefox */
-    -webkit-overflow-scrolling: touch; /* Scroll fluido en iOS */
+    background: transparent !important;
+    -webkit-appearance: none !important;
   }
 
-  /* Efecto de cristal esmerilado */
-  .glass {
-    @apply bg-zinc-950/70 backdrop-blur-xl border border-white/10;
+  .no-scrollbar::-webkit-scrollbar-thumb,
+  .no-scrollbar::-webkit-scrollbar-track {
+    background: transparent !important;
+    border: none !important;
   }
 }
 
-/* --- ESTILOS BASE --- */
 @layer base {
-  * { 
-    @apply border-border transition-colors duration-200; 
-  }
-
+  * { @apply border-border transition-colors duration-200; }
+  
   body { 
-    @apply bg-background text-foreground antialiased;
-    /* Color de selección de texto personalizado */
-    @apply selection:bg-[oklch(0.55_0.15_45)] selection:text-white;
-    
-    /* Opcional: Ocultar scroll general de la página para look de App */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    @apply bg-background text-foreground antialiased selection:bg-[oklch(0.55_0.15_45)] selection:text-white;
+    /* Aplicamos el nuke a toda la web por si las dudas */
+    scrollbar-width: none !important;
   }
 
   body::-webkit-scrollbar {
-    display: none;
+    display: none !important;
+    width: 0 !important;
   }
 }
 
-/* --- OPTIMIZACIONES EXTRAS --- */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Evita destellos blancos en imágenes cargando en modo oscuro */
-.dark img {
-  filter: brightness(.9) contrast(1.1);
-}
+.glass { @apply bg-zinc-950/70 backdrop-blur-xl border border-white/10; }
