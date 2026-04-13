@@ -20,11 +20,11 @@ export function ProductModal({ isOpen, onClose, product }: any) {
     setIsAdding(true)
     addToCart({ id: product.id.toString(), name: product.name, price: numericPrice })
 
-    // Animación ultra rápida (350ms) para que se sienta instantánea
+    // Animación de succión rápida
     setTimeout(() => {
       onClose()
       setTimeout(() => setIsAdding(false), 100)
-    }, 350) 
+    }, 400) 
   }
 
   return (
@@ -32,27 +32,32 @@ export function ProductModal({ isOpen, onClose, product }: any) {
       <DialogContent className="max-w-[90vw] sm:max-w-[450px] overflow-hidden rounded-[3rem] border-none p-0 shadow-2xl backdrop-blur-2xl bg-black/40 max-h-[90vh] no-scrollbar [&>button]:text-white [&>button]:bg-black/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5">
         
         <motion.div
-          /* ENTRADA: Expansión limpia desde 0.85 */
-          initial={{ scale: 0.85, opacity: 0 }}
+          /* 1. ANIMACIÓN DE ENTRADA: Expansión desde el centro con un ligero rebote */
+          initial={{ scale: 0.4, opacity: 0, x: 0, y: 0 }}
           animate={isAdding ? {
-            /* SALIDA: Encogimiento rápido al icono */
-            scale: [1, 1.05, 0],      // "Pop" inicial y luego desaparece a 0
-            x: [0, 0, 150],           // Viaja a la derecha
-            y: [0, 0, 450],           // Viaja hacia abajo (al icono)
+            /* 2. ANIMACIÓN DE SALIDA (AGREGAR): Encogimiento al icono */
+            scale: [1, 1.1, 0], 
+            x: [0, 0, 150], 
+            y: [0, 0, 500], 
             opacity: [1, 1, 0],
-            filter: "blur(0px)",      // Cero blur para máxima fluidez
           } : {
+            /* ESTADO ABIERTO: Expansión completa */
             scale: 1,
             opacity: 1,
             x: 0,
             y: 0,
-            filter: "blur(0px)"
           }}
-          transition={{ 
-            duration: 0.35,           // Bajamos el tiempo para que sea "eléctrica"
-            ease: [0.32, 0, 0.67, 0]  // Curva de aceleración pura (Ease-In)
+          transition={isAdding ? {
+            /* Transición para la succión: Rápida y directa */
+            duration: 0.4,
+            ease: [0.32, 0, 0.67, 0]
+          } : {
+            /* Transición para la expansión: Tipo resorte industrial */
+            type: "spring",
+            damping: 20,
+            stiffness: 260
           }}
-          style={{ transformOrigin: "bottom right" }} // El punto de fuga es la esquina inferior derecha
+          style={{ transformOrigin: isAdding ? "bottom right" : "center" }}
           className="flex flex-col w-full h-full"
         >
           {/* IMAGEN */}
