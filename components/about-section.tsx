@@ -2,10 +2,11 @@ import { Sparkles, HelpCircle, MapPin, CreditCard, Gift, MessageCircle } from "l
 
 export function AboutSection() {
   return (
-    <section className="mx-auto max-w-2xl px-4 py-16 text-white">
+    /* AGREGAMOS EL ID 'about' AQUÍ */
+    <section id="about" className="mx-auto max-w-2xl px-4 py-16 text-white">
+      
       {/* SECCIÓN: QUIÉNES SOMOS */}
       <div className="mb-16 rounded-[2rem] bg-gradient-to-br from-zinc-900 to-black p-8 border border-white/10 shadow-2xl relative overflow-hidden">
-        {/* Decoración de fondo */}
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/20 blur-[50px]"></div>
 
         <div className="relative z-10">
@@ -22,15 +23,14 @@ export function AboutSection() {
         </div>
       </div>
 
-      {/* SECCIÓN: PREGUNTAS FRECUENTES */}
-      <div>
+      {/* SECCIÓN: PREGUNTAS FRECUENTES (AGREGAMOS ID 'faq') */}
+      <div id="faq">
         <div className="flex items-center gap-3 mb-6 px-2">
           <HelpCircle className="h-6 w-6 text-white/70" />
           <h2 className="text-xl font-black tracking-tight">Preguntas Frecuentes</h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* FAQ 1 */}
           <div className="rounded-2xl bg-white/5 p-5 border border-white/5 transition-colors hover:bg-white/10">
             <div className="flex items-center gap-2 mb-2 text-orange-400">
               <MapPin className="h-4 w-4 shrink-0" />
@@ -41,7 +41,6 @@ export function AboutSection() {
             </p>
           </div>
 
-          {/* FAQ 2 */}
           <div className="rounded-2xl bg-white/5 p-5 border border-white/5 transition-colors hover:bg-white/10">
             <div className="flex items-center gap-2 mb-2 text-orange-400">
               <Gift className="h-4 w-4 shrink-0" />
@@ -52,7 +51,6 @@ export function AboutSection() {
             </p>
           </div>
 
-          {/* FAQ 3 */}
           <div className="rounded-2xl bg-white/5 p-5 border border-white/5 transition-colors hover:bg-white/10">
             <div className="flex items-center gap-2 mb-2 text-orange-400">
               <CreditCard className="h-4 w-4 shrink-0" />
@@ -63,7 +61,6 @@ export function AboutSection() {
             </p>
           </div>
 
-          {/* FAQ 4: Nuevos sabores */}
           <div className="rounded-2xl bg-white/5 p-5 border border-white/5 transition-colors hover:bg-white/10">
             <div className="flex items-center gap-2 mb-2 text-orange-400">
               <MessageCircle className="h-4 w-4 shrink-0" />
@@ -76,7 +73,6 @@ export function AboutSection() {
         </div>
       </div>
 
-      {/* Footer sencillo */}
       <div className="mt-16 text-center text-xs font-bold uppercase tracking-widest text-zinc-600">
         <p>Diseñado con 🖤 en León, Gto.</p>
         <p className="mt-1">© {new Date().getFullYear()} BOTA-NA</p>
