@@ -7,10 +7,10 @@ import { CategoryTabs } from "@/components/category-tabs"
 import { MenuItem } from "@/components/menu-item"
 import { ProductModal } from "@/components/product-modal"
 
-// Lista de categorías para el menú y las pestañas
 const categories = ["🔥 TOP", "Todos", "Cacahuates", "Chips", "Papas", "Gomitas", "Bebidas y más"]
 
 const menuItems = [
+  // ... tus items se quedan igual
   { id: 1, name: "Cacahuates Queso", description: "Cacahuates holandeses crujientes con un irresistible sabor a queso.", price: "$15", image: "/images/2.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: false },
   { id: 2, name: "Cacahuates Habanero", description: "Cacahuates holandeses con el intenso sabor del chile habanero.", price: "$15", image: "/images/4.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: true },
   { id: 3, name: "Cacahuates Jalapeño", description: "Cacahuates holandeses con el sabor clasico del chile jalapeño.", price: "$15", image: "/images/3.webp", category: "Cacahuates", tags: ["100 gramos"], isPopular: false, isSpicy: true },
@@ -37,38 +37,50 @@ export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stockData, setStockData] = useState<Record<number, boolean>>({})
 
-  // --- LÓGICA DE SWIPE (Deslizar en celular) ---
-  const [touchStart, setTouchStart] = useState<number | null>(null)
-  const [touchEnd, setTouchEnd] = useState<number | null>(null)
-  const minSwipeDistance = 50
+  // --- LÓGICA DE SWIPE MEJORADA (Anti-clicks fantasmas en iPhone) ---
+  const [touchStart, setTouchStart] = useState<{ x: number, y: number } | null>(null)
+  const [touchEnd, setTouchEnd] = useState<{ x: number, y: number } | null>(null)
+  const minSwipeDistance = 70 // Subimos un poco el umbral para mayor seguridad
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientX)
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    })
   }
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX)
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    })
   }
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > minSwipeDistance
-    const isRightSwipe = distance < -minSwipeDistance
 
-    if (isLeftSwipe || isRightSwipe) {
+    const distanceX = touchStart.x - touchEnd.x
+    const distanceY = touchStart.y - touchEnd.y
+    
+    // VERIFICACIÓN CLAVE: ¿Es un movimiento horizontal? 
+    // Si el movimiento vertical es mayor al horizontal, ignoramos el swipe.
+    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY)
+    const isEnoughDistance = Math.abs(distanceX) > minSwipeDistance
+
+    if (isHorizontalSwipe && isEnoughDistance) {
       const currentIndex = categories.indexOf(activeCategory)
-      if (isLeftSwipe && currentIndex < categories.length - 1) {
+      if (distanceX > 0 && currentIndex < categories.length - 1) {
+        // Swipe a la izquierda (Siguiente)
         setActiveCategory(categories[currentIndex + 1])
-      }
-      if (isRightSwipe && currentIndex > 0) {
+      } else if (distanceX < 0 && currentIndex > 0) {
+        // Swipe a la derecha (Anterior)
         setActiveCategory(categories[currentIndex - 1])
       }
     }
   }
 
-  // --- CARGA DE STOCK DESDE GOOGLE SHEETS ---
+  // --- RESTO DEL CÓDIGO (Stock y Filtrado) ---
   useEffect(() => {
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSQKeuTywAmniswIKciTQS0hI-fMIm4l0DRiGATcUpA_eff42eVS6171CngdgtGphWUADrllm5dcxe1/pub?output=csv")
       .then((res) => res.text())
@@ -92,7 +104,6 @@ export default function MenuPage() {
     inStock: stockData[item.id] !== undefined ? stockData[item.id] : true,
   }))
 
-  // Lógica de filtrado avanzada
   const filteredItems = 
     activeCategory === "🔥 TOP" 
     ? itemsWithStock.filter(item => item.isPopular) 
@@ -107,18 +118,11 @@ export default function MenuPage() {
 
   return (
     <main className="relative min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
-      {/* Efecto de iluminación ambiental */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        
-        {/* HEADER: Recibe categorías y función para el menú lateral */}
-        <MenuHeader 
-          categories={categories} 
-          onCategoryChange={setActiveCategory} 
-        />
+        <MenuHeader categories={categories} onCategoryChange={setActiveCategory} />
 
-        {/* CATEGORÍAS SUPERIORES (Efecto pastilla naranja) */}
         <section className="pb-4 sm:pb-8 sticky top-[80px] z-20 bg-zinc-950/80 backdrop-blur-md pt-2">
           <CategoryTabs
             categories={categories}
@@ -127,7 +131,6 @@ export default function MenuPage() {
           />
         </section>
 
-        {/* CUADRÍCULA DE PRODUCTOS (Soporta Swipe) */}
         <section
           className="pb-16 min-h-[70vh]"
           onTouchStart={onTouchStart}
@@ -141,14 +144,7 @@ export default function MenuPage() {
             {filteredItems.map((item) => (
               <MenuItem
                 key={item.id}
-                name={item.name}
-                description={item.description}
-                price={item.price}
-                image={item.image}
-                tags={item.tags}
-                isPopular={item.isPopular}
-                isSpicy={item.isSpicy}
-                inStock={item.inStock}
+                {...item}
                 onClick={() => handleProductClick(item)}
               />
             ))}
@@ -161,10 +157,8 @@ export default function MenuPage() {
           )}
         </section>
 
-        <footer className="border-t border-white/10 py-12">
-          <div className="text-center opacity-40">
-            <p className="text-[10px] font-black uppercase tracking-widest">BOTA-NA by Saul & Aranza</p>
-          </div>
+        <footer className="border-t border-white/10 py-12 text-center opacity-40">
+          <p className="text-[10px] font-black uppercase tracking-widest">BOTA-NA by Saul & Aranza</p>
         </footer>
       </div>
 
@@ -173,7 +167,6 @@ export default function MenuPage() {
         onClose={() => setIsModalOpen(false)}
         product={selectedProduct}
       />
-      
       <AboutSection />
     </main>
   )
