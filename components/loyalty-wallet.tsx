@@ -1,8 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Gift, CheckCircle2, AlertCircle, Loader2, Instagram, RefreshCcw } from "lucide-react"
+import { X, Gift, CheckCircle2, Loader2, Instagram, RefreshCcw, Trophy, Gamepad2, Ticket, Check } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabase"
+// Asegúrate de que el archivo index.tsx esté en components/arcade/
+import { BotaArcade } from "./arcade"
 
 interface LoyaltyWalletProps {
   isOpen: boolean
@@ -10,9 +13,10 @@ interface LoyaltyWalletProps {
 }
 
 export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
+  // PASOS: 'login', 'verify', 'card', 'decision', 'arcade'
+  const [view, setView] = useState<'login' | 'verify' | 'card' | 'decision' | 'arcade'>('login')
   const [points, setPoints] = useState(0)
   const [usuarioIg, setUsuarioIg] = useState("")
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [inputCode, setInputCode] = useState("")
   const [statusMsg, setStatusMsg] = useState({ text: "", type: "" })
   const [isLoading, setIsLoading] = useState(false)
@@ -21,7 +25,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
 
   const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbxglhcx_4-m8GXWBawpdymV9Vo5QtSzdYnmq4042JE_pV4m1IaHVyzTO9YkFPEfyazvdQ/exec"
 
-  // Recuperar sesión al abrir
   useEffect(() => {
     if (isOpen) {
       const savedUser = localStorage.getItem("botaNaUsername")
@@ -46,16 +49,17 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
         const { data: newUser } = await supabase
           .from('clientes_leales')
           .insert([{ usuario_ig: cleanUser, puntos: 0, is_verified: false }])
-          .select()
-          .single()
+          .select().single()
         data = newUser
       }
 
       if (data) {
         setPoints(data.puntos)
         setIsVerified(data.is_verified)
-        setIsLoggedIn(true)
         localStorage.setItem("botaNaUsername", cleanUser)
+        // Decidir a qué pantalla mandarlo
+        if (!data.is_verified) setView('verify')
+        else setView('card')
       }
     } catch (err) {
       setStatusMsg({ text: "Error de conexión", type: "error" })
@@ -64,38 +68,8 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
     }
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (usuarioIg.length < 3) return
-    fetchUserData(usuarioIg)
-  }
-
-  const handleActivate = async () => {
-    if (!hasClickedInstagram) return
-    setIsLoading(true)
-    const { error } = await supabase
-      .from('clientes_leales')
-      .update({ is_verified: true })
-      .eq('usuario_ig', usuarioIg)
-
-    if (!error) setIsVerified(true)
-    setIsLoading(false)
-  }
-
-  const handleResetCard = async () => {
-    if (window.confirm("¿Reiniciar tarjeta?")) {
-      const { error } = await supabase
-        .from('clientes_leales')
-        .update({ puntos: 0 })
-        .eq('usuario_ig', usuarioIg)
-      if (!error) {
-        setPoints(0)
-        setStatusMsg({ text: "Reiniciada con éxito", type: "success" })
-      }
-    }
-  }
-
-  const handleAddPoint = async () => {
+  // --- LÓGICA DE PUNTOS Y CÓDIGOS ---
+  const handleValidateCode = async () => {
     const cleanCode = inputCode.trim().toUpperCase()
     if (!cleanCode) return
     setIsLoading(true)
@@ -111,17 +85,9 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
       const result = await response.json()
 
       if (result.success) {
-        const newPoints = points + 1
-        const { error } = await supabase
-          .from('clientes_leales')
-          .update({ puntos: newPoints })
-          .eq('usuario_ig', usuarioIg)
-
-        if (!error) {
-          setPoints(newPoints)
-          setStatusMsg({ text: result.message, type: "success" })
-          setInputCode("")
-        }
+        // ¡CÓDIGO VÁLIDO! En lugar de sumar punto, vamos a la decisión
+        setStatusMsg({ text: "", type: "" })
+        setView('decision')
       } else {
         setStatusMsg({ text: result.message, type: "error" })
       }
@@ -132,130 +98,185 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
     }
   }
 
+  const handleSecurePoint = async () => {
+    setIsLoading(true)
+    const newPoints = points + 1
+    const { error } = await supabase
+      .from('clientes_leales')
+      .update({ puntos: newPoints })
+      .eq('usuario_ig', usuarioIg)
+
+    if (!error) {
+      setPoints(newPoints)
+      setInputCode("")
+      setView('card')
+      setStatusMsg({ text: "¡Punto asegurado!", type: "success" })
+    }
+    setIsLoading(false)
+  }
+
+  const handleArcadeReward = async (reward: string) => {
+    // Si el premio es de puntos (Nivel 1), actualizamos DB
+    if (reward.includes("Puntos")) {
+      const { error } = await supabase
+        .from('clientes_leales')
+        .update({ puntos: points + 1 }) // Aquí puedes decidir si das 1 o 2
+        .eq('usuario_ig', usuarioIg)
+      if (!error) setPoints(prev => prev + 1)
+    }
+    
+    // Mostramos el premio final
+    alert(`🏆 ¡BOTA-NA ARCADE! \nGanaste: ${reward}\nMuestra este mensaje/screenshot para canjearlo.`)
+    setInputCode("")
+    setView('card')
+  }
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Fondo oscuro - También cierra al hacer clic fuera */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
       
-      <div className="relative w-full max-w-sm rounded-[2rem] bg-zinc-900 border border-white/10 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-        
-        {/* BOTÓN CERRAR (X) CORREGIDO */}
-        <button 
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }} 
-          className="absolute right-4 top-4 z-[120] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:bg-white/20 active:scale-90"
-        >
-          <X className="h-6 w-6" />
-        </button>
-
-        {!isLoggedIn ? (
-          /* PANTALLA DE INGRESO */
-          <div className="py-8 text-center animate-in fade-in duration-300">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 shadow-xl">
-              <Instagram className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-xl font-black text-white uppercase tracking-tight">Tu BOTA-Card</h2>
-            <p className="mt-2 text-sm text-zinc-400">Ingresa tu usuario de Instagram para comenzar.</p>
-            <form onSubmit={handleLogin} className="mt-8 space-y-4">
-              <input
-                type="text"
-                placeholder="@tu_usuario"
-                value={usuarioIg}
-                onChange={(e) => setUsuarioIg(e.target.value)}
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-4 text-center text-lg font-bold text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-              />
-              <button type="submit" disabled={isLoading || usuarioIg.length < 3} className="w-full rounded-xl bg-gradient-to-r from-pink-600 to-purple-700 py-4 font-black text-white active:scale-95 disabled:opacity-50">
-                {isLoading ? <Loader2 className="animate-spin mx-auto" /> : "ENTRAR"}
-              </button>
-            </form>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-2xl"
+      >
+        {/* HEADER PREMIUM */}
+        <div className="bg-[oklch(0.55_0.15_45)] p-6 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-5 w-5" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">BotaCard v2.0</span>
           </div>
-        ) : !isVerified ? (
-          /* PANTALLA DE VERIFICACIÓN IG */
-          <div className="flex flex-col items-center py-8 text-center animate-in fade-in duration-500">
-             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 shadow-xl">
-               <Instagram className="h-8 w-8 text-white" />
-             </div>
-             <h2 className="text-xl font-black text-white uppercase tracking-tight">Activa tu BOTA-Card</h2>
-             <p className="mt-2 text-sm text-zinc-400">Hola @{usuarioIg}, síguenos para activar tus puntos.</p>
-             <div className="mt-8 w-full space-y-3">
-               <a href="https://instagram.com/bota.na.mx" target="_blank" rel="noopener noreferrer" onClick={() => setHasClickedInstagram(true)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-4 text-[10px] font-black text-white">
-                 1. IR A INSTAGRAM @BOTA.NA.MX
-               </a>
-               <button onClick={handleActivate} disabled={!hasClickedInstagram || isLoading} className={`w-full rounded-xl py-4 text-[10px] font-black text-white shadow-lg ${hasClickedInstagram ? "bg-gradient-to-r from-orange-500 to-red-600" : "bg-zinc-800 opacity-30"}`}>
-                 2. YA LOS SIGO, ACTIVAR
-               </button>
-             </div>
-          </div>
-        ) : (
-          /* PANTALLA DE LA TARJETA DE PUNTOS */
-          <div className="animate-in fade-in duration-500">
-            <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-orange-500 to-red-600 mb-4 shadow-lg">
-                <Gift className="h-6 w-6 text-white" />
-              </div>
-              <h2 className="text-xl font-black text-white tracking-tight">Mi BOTA-Card</h2>
-              <p className="mt-1 text-[10px] text-zinc-500 font-mono uppercase tracking-widest leading-none">USUARIO: @{usuarioIg}</p>
-            </div>
+          <button onClick={onClose} className="rounded-full bg-black/20 p-2 hover:bg-black/40 transition-all">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-            <div className="mt-6 grid grid-cols-5 gap-3">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className={`flex h-11 w-11 items-center justify-center rounded-full transition-all duration-500 ${i < points ? "bg-gradient-to-tr from-orange-500 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.4)] scale-105" : "bg-white/5 border border-white/10"}`}>
-                  {i < points ? <CheckCircle2 className="h-5 w-5 text-white" /> : <span className="text-[10px] font-bold text-white/20">{i + 1}</span>}
+        {/* CONTENEDOR DE ALTURA FIJA PARA EVITAR SALTOS */}
+        <div className="h-[520px] p-8 flex flex-col justify-center overflow-y-auto no-scrollbar">
+          <AnimatePresence mode="wait">
+
+            {/* LOGIN */}
+            {view === 'login' && (
+              <motion.div key="login" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-center space-y-8">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-500 to-red-600 shadow-xl">
+                  <Instagram className="h-8 w-8 text-white" />
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-8 rounded-2xl bg-black/40 p-4 border border-white/5">
-              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center leading-none">Código de Compra</p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="BOTA-XXXX"
-                  value={inputCode}
-                  onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                  disabled={isLoading || points >= 10}
-                  className="w-full rounded-xl bg-white/10 px-4 py-2 text-xs font-bold text-white focus:outline-none uppercase"
-                />
-                <button onClick={handleAddPoint} disabled={isLoading || points >= 10 || !inputCode} className="flex items-center justify-center rounded-xl bg-white text-black px-4 py-2 text-xs font-black transition-transform active:scale-95 disabled:opacity-50">
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "CANJEAR"}
-                </button>
-              </div>
-
-              {statusMsg.text && (
-                <p className={`mt-3 flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-wider ${statusMsg.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                  {statusMsg.text}
-                </p>
-              )}
-
-              {points >= 10 && (
-                <div className="mt-4 flex flex-col items-center space-y-3">
-                  <p className="text-center text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">¡TARJETA LLENA!</p>
-                  <a href={`https://wa.me/524774950232?text=Hola!%20Llené%20mi%20BOTA-Card.%20Mi%20Usuario%20es:%20@${usuarioIg}.%20Quiero%20mi%20premio!`} target="_blank" rel="noopener noreferrer" className="w-full rounded-xl bg-green-600 py-3 text-center text-[11px] font-black text-white shadow-lg transition-transform active:scale-95">
-                    WHATSAPP PREMIO
-                  </a>
-                  <button onClick={handleResetCard} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-300 uppercase hover:bg-white/10 hover:text-white transition-all active:scale-95">
-                    <RefreshCcw className="h-3.5 w-3.5" /> REINICIAR TARJETA
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Tu BOTA-Card</h2>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Ingresa tu Instagram para empezar</p>
+                </div>
+                <div className="space-y-3">
+                  <input type="text" placeholder="@usuario" value={usuarioIg} onChange={(e) => setUsuarioIg(e.target.value)}
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-4 text-center text-white font-bold focus:border-[oklch(0.55_0.15_45)] outline-none" />
+                  <button onClick={() => fetchUserData(usuarioIg)} disabled={isLoading} className="w-full rounded-2xl bg-white py-4 font-black uppercase text-black active:scale-95 transition-all">
+                    {isLoading ? <Loader2 className="animate-spin mx-auto" /> : "ENTRAR"}
                   </button>
                 </div>
-              )}
-            </div>
-            
-            {/* OPCIÓN PARA CERRAR SESIÓN */}
-            <button 
-              type="button"
-              onClick={() => { localStorage.removeItem("botaNaUsername"); setIsLoggedIn(false); setUsuarioIg(""); }}
-              className="mt-6 w-full text-[9px] text-zinc-600 uppercase font-bold hover:text-zinc-400 transition-colors"
-            >
-              Cerrar Sesión / Cambiar Usuario
-            </button>
-          </div>
-        )}
-      </div>
+              </motion.div>
+            )}
+
+            {/* VERIFY */}
+            {view === 'verify' && (
+              <motion.div key="verify" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-6">
+                <div className="space-y-2">
+                  <h2 className="text-xl font-black text-white uppercase italic">Activa tu tarjeta</h2>
+                  <p className="text-sm text-zinc-500">Hola @{usuarioIg}, síguenos para validar tu cuenta.</p>
+                </div>
+                <a href="https://instagram.com/bota.na.mx" target="_blank" onClick={() => setHasClickedInstagram(true)}
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white/5 border border-white/10 py-4 font-black text-white">
+                  <Instagram className="h-5 w-5 text-pink-500" /> @BOTA.NA.MX
+                </a>
+                <button onClick={async () => {
+                  if (!hasClickedInstagram) return;
+                  setIsLoading(true);
+                  await supabase.from('clientes_leales').update({ is_verified: true }).eq('usuario_ig', usuarioIg);
+                  setIsVerified(true); setView('card'); setIsLoading(false);
+                }} disabled={!hasClickedInstagram} className={`w-full rounded-2xl py-4 font-black text-white transition-all ${hasClickedInstagram ? "bg-orange-600" : "bg-zinc-800 opacity-20"}`}>
+                  YA LOS SIGO, ACTIVAR
+                </button>
+              </motion.div>
+            )}
+
+            {/* CARD (PRINCIPAL) */}
+            {view === 'card' && (
+              <motion.div key="card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="text-center">
+                  <p className="text-[10px] font-black text-[oklch(0.55_0.15_45)] uppercase tracking-widest">@{usuarioIg}</p>
+                  <h3 className="text-lg font-black text-white uppercase italic tracking-tighter">Mis Puntos</h3>
+                </div>
+                
+                <div className="grid grid-cols-5 gap-3 bg-white/5 p-4 rounded-[2rem] border border-white/5">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className={`aspect-square rounded-full flex items-center justify-center transition-all duration-700 ${i < points ? "bg-[oklch(0.55_0.15_45)] shadow-[0_0_15px_rgba(194,65,12,0.3)]" : "bg-zinc-900 border border-white/5"}`}>
+                      {i < points ? <Check className="h-4 w-4 text-white stroke-[4px]" /> : <span className="text-[9px] font-bold text-zinc-800">{i + 1}</span>}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <div className="relative">
+                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                    <input type="text" placeholder="BOTA-XXXX" value={inputCode} onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                      className="w-full rounded-2xl bg-white/5 border border-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white outline-none focus:border-[oklch(0.55_0.15_45)]" />
+                  </div>
+                  <button onClick={handleValidateCode} disabled={isLoading || points >= 10} className="w-full rounded-2xl bg-white py-4 font-black uppercase text-black active:scale-95 shadow-xl">
+                    {isLoading ? <Loader2 className="animate-spin mx-auto" /> : "CANJEAR CÓDIGO"}
+                  </button>
+                  {statusMsg.text && <p className={`text-center text-[10px] font-bold uppercase ${statusMsg.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>{statusMsg.text}</p>}
+                </div>
+
+                {points >= 10 && (
+                   <button onClick={() => window.open(`https://wa.me/524774950232?text=Llené mi BOTA-Card @${usuarioIg}`)} className="w-full bg-green-600 py-4 rounded-2xl font-black text-white uppercase text-xs">Reclamar Premio WhatsApp</button>
+                )}
+              </motion.div>
+            )}
+
+            {/* DECISION (EL DILEMA) */}
+            {view === 'decision' && (
+              <motion.div key="decision" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 text-center">
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">¡Código <span className="text-[oklch(0.55_0.15_45)]">Válido</span>!</h3>
+                  <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">¿Qué prefieres hacer con tu ficha?</p>
+                </div>
+                <div className="grid gap-4">
+                  <button onClick={handleSecurePoint} className="flex items-center justify-between p-6 bg-zinc-900 rounded-[2rem] border border-white/5 text-left group active:scale-95 transition-all">
+                    <div>
+                      <h4 className="text-white font-black uppercase italic">Asegurar Punto</h4>
+                      <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter">+1 Punto directo</p>
+                    </div>
+                    <Trophy className="h-8 w-8 text-zinc-800 group-hover:text-white transition-colors" />
+                  </button>
+                  <button onClick={() => setView('arcade')} className="flex items-center justify-between p-6 bg-white rounded-[2rem] text-left group active:scale-95 transition-all relative overflow-hidden">
+                    <div className="relative z-10">
+                      <h4 className="text-black font-black uppercase italic">BotaArcade</h4>
+                      <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-tighter">Juega por premios mayores</p>
+                    </div>
+                    <Gamepad2 className="h-8 w-8 text-black/20 group-hover:text-black transition-colors relative z-10" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[oklch(0.55_0.15_45)] blur-[40px] opacity-20" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ARCADE */}
+            {view === 'arcade' && (
+              <motion.div key="arcade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
+                <BotaArcade 
+                  onReward={handleArcadeReward} 
+                  onCancel={() => setView('decision')} 
+                />
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        </div>
+
+        {/* FOOTER */}
+        <div className="p-4 bg-black/40 text-center border-t border-white/5">
+           <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em]">Industrial Snacks León • GTO</p>
+        </div>
+      </motion.div>
     </div>
   )
 }
