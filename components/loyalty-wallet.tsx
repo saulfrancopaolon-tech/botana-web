@@ -1,10 +1,22 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Gift, CheckCircle2, Loader2, Instagram, RefreshCcw, Trophy, Gamepad2, Ticket, Check } from "lucide-react"
+import { 
+  X, 
+  Gift, 
+  CheckCircle2, 
+  Loader2, 
+  Instagram, 
+  RefreshCcw, 
+  Trophy, 
+  Gamepad2, 
+  Ticket, 
+  Check, 
+  Wallet 
+} from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabase"
-// Asegúrate de que el archivo index.tsx esté en components/arcade/
+// Asegúrate de que el archivo index.tsx esté en la carpeta components/arcade/
 import { BotaArcade } from "./arcade"
 
 interface LoyaltyWalletProps {
@@ -57,7 +69,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
         setPoints(data.puntos)
         setIsVerified(data.is_verified)
         localStorage.setItem("botaNaUsername", cleanUser)
-        // Decidir a qué pantalla mandarlo
         if (!data.is_verified) setView('verify')
         else setView('card')
       }
@@ -68,7 +79,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
     }
   }
 
-  // --- LÓGICA DE PUNTOS Y CÓDIGOS ---
   const handleValidateCode = async () => {
     const cleanCode = inputCode.trim().toUpperCase()
     if (!cleanCode) return
@@ -85,7 +95,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
       const result = await response.json()
 
       if (result.success) {
-        // ¡CÓDIGO VÁLIDO! En lugar de sumar punto, vamos a la decisión
         setStatusMsg({ text: "", type: "" })
         setView('decision')
       } else {
@@ -116,16 +125,14 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
   }
 
   const handleArcadeReward = async (reward: string) => {
-    // Si el premio es de puntos (Nivel 1), actualizamos DB
     if (reward.includes("Puntos")) {
       const { error } = await supabase
         .from('clientes_leales')
-        .update({ puntos: points + 1 }) // Aquí puedes decidir si das 1 o 2
+        .update({ puntos: points + 1 })
         .eq('usuario_ig', usuarioIg)
       if (!error) setPoints(prev => prev + 1)
     }
     
-    // Mostramos el premio final
     alert(`🏆 ¡BOTA-NA ARCADE! \nGanaste: ${reward}\nMuestra este mensaje/screenshot para canjearlo.`)
     setInputCode("")
     setView('card')
@@ -141,7 +148,7 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
         initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-2xl"
       >
-        {/* HEADER PREMIUM */}
+        {/* HEADER */}
         <div className="bg-[oklch(0.55_0.15_45)] p-6 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="h-5 w-5" />
@@ -152,11 +159,10 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
           </button>
         </div>
 
-        {/* CONTENEDOR DE ALTURA FIJA PARA EVITAR SALTOS */}
+        {/* CONTENEDOR DE ALTURA FIJA */}
         <div className="h-[520px] p-8 flex flex-col justify-center overflow-y-auto no-scrollbar">
           <AnimatePresence mode="wait">
 
-            {/* LOGIN */}
             {view === 'login' && (
               <motion.div key="login" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-center space-y-8">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-500 to-red-600 shadow-xl">
@@ -176,7 +182,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
               </motion.div>
             )}
 
-            {/* VERIFY */}
             {view === 'verify' && (
               <motion.div key="verify" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-6">
                 <div className="space-y-2">
@@ -198,7 +203,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
               </motion.div>
             )}
 
-            {/* CARD (PRINCIPAL) */}
             {view === 'card' && (
               <motion.div key="card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="text-center">
@@ -232,7 +236,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
               </motion.div>
             )}
 
-            {/* DECISION (EL DILEMA) */}
             {view === 'decision' && (
               <motion.div key="decision" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 text-center">
                 <div className="space-y-1">
@@ -259,7 +262,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
               </motion.div>
             )}
 
-            {/* ARCADE */}
             {view === 'arcade' && (
               <motion.div key="arcade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
                 <BotaArcade 
@@ -272,7 +274,6 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
           </AnimatePresence>
         </div>
 
-        {/* FOOTER */}
         <div className="p-4 bg-black/40 text-center border-t border-white/5">
            <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em]">Industrial Snacks León • GTO</p>
         </div>
