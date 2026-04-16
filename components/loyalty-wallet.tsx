@@ -1,23 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { 
-  X, 
-  Gift, 
-  CheckCircle2, 
-  Loader2, 
-  Instagram, 
-  RefreshCcw, 
-  Trophy, 
-  Gamepad2, 
-  Ticket, 
-  Check, 
-  Wallet 
-} from "lucide-react"
+import { X, Gift, CheckCircle2, Loader2, Instagram, Trophy, Gamepad2, Ticket, Check, Wallet } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabase"
-// Asegúrate de que el archivo index.tsx esté en la carpeta components/arcade/
-import { BotaArcade } from "./arcade"
+// Cambiamos el import a la ruleta
+import { BotaRoulette } from "./arcade/bota-roulette"
 
 interface LoyaltyWalletProps {
   isOpen: boolean
@@ -25,8 +13,7 @@ interface LoyaltyWalletProps {
 }
 
 export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
-  // PASOS: 'login', 'verify', 'card', 'decision', 'arcade'
-  const [view, setView] = useState<'login' | 'verify' | 'card' | 'decision' | 'arcade'>('login')
+  const [view, setView] = useState<'login' | 'verify' | 'card' | 'decision' | 'roulette'>('login')
   const [points, setPoints] = useState(0)
   const [usuarioIg, setUsuarioIg] = useState("")
   const [inputCode, setInputCode] = useState("")
@@ -51,32 +38,16 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
     setIsLoading(true)
     const cleanUser = username.trim().toLowerCase().replace("@", "")
     try {
-      let { data, error } = await supabase
-        .from('clientes_leales')
-        .select('*')
-        .eq('usuario_ig', cleanUser)
-        .single()
-
+      let { data, error } = await supabase.from('clientes_leales').select('*').eq('usuario_ig', cleanUser).single()
       if (error && error.code === 'PGRST116') {
-        const { data: newUser } = await supabase
-          .from('clientes_leales')
-          .insert([{ usuario_ig: cleanUser, puntos: 0, is_verified: false }])
-          .select().single()
+        const { data: newUser } = await supabase.from('clientes_leales').insert([{ usuario_ig: cleanUser, puntos: 0, is_verified: false }]).select().single()
         data = newUser
       }
-
       if (data) {
-        setPoints(data.puntos)
-        setIsVerified(data.is_verified)
-        localStorage.setItem("botaNaUsername", cleanUser)
-        if (!data.is_verified) setView('verify')
-        else setView('card')
+        setPoints(data.puntos); setIsVerified(data.is_verified); localStorage.setItem("botaNaUsername", cleanUser)
+        setView(data.is_verified ? 'card' : 'verify')
       }
-    } catch (err) {
-      setStatusMsg({ text: "Error de conexión", type: "error" })
-    } finally {
-      setIsLoading(false)
-    }
+    } catch (err) { setStatusMsg({ text: "Error de conexión", type: "error" }) } finally { setIsLoading(false) }
   }
 
   const handleValidateCode = async () => {
@@ -93,47 +64,32 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
         redirect: "follow"
       })
       const result = await response.json()
-
-      if (result.success) {
-        setStatusMsg({ text: "", type: "" })
-        setView('decision')
-      } else {
-        setStatusMsg({ text: result.message, type: "error" })
-      }
-    } catch (error) {
-      setStatusMsg({ text: "Error de red", type: "error" })
-    } finally {
-      setIsLoading(false)
-    }
+      if (result.success) { setStatusMsg({ text: "", type: "" }); setView('decision') } 
+      else { setStatusMsg({ text: result.message, type: "error" }) }
+    } catch (error) { setStatusMsg({ text: "Error de red", type: "error" }) } finally { setIsLoading(false) }
   }
 
   const handleSecurePoint = async () => {
     setIsLoading(true)
-    const newPoints = points + 1
-    const { error } = await supabase
-      .from('clientes_leales')
-      .update({ puntos: newPoints })
-      .eq('usuario_ig', usuarioIg)
-
-    if (!error) {
-      setPoints(newPoints)
-      setInputCode("")
-      setView('card')
-      setStatusMsg({ text: "¡Punto asegurado!", type: "success" })
-    }
+    const { error } = await supabase.from('clientes_leales').update({ puntos: points + 1 }).eq('usuario_ig', usuarioIg)
+    if (!error) { setPoints(prev => prev + 1); setInputCode(""); setView('card'); setStatusMsg({ text: "¡Punto asegurado!", type: "success" }) }
     setIsLoading(false)
   }
 
-  const handleArcadeReward = async (reward: string) => {
-    if (reward.includes("Puntos")) {
-      const { error } = await supabase
-        .from('clientes_leales')
-        .update({ puntos: points + 1 })
-        .eq('usuario_ig', usuarioIg)
+  const handleRouletteFinish = async (prize: any) => {
+    // IMPORTANTE: Aquí el código ya se usó (se validó antes). 
+    // Solo sumamos punto si cayó en "1 Punto".
+    if (prize.label === "1 Punto") {
+      const { error } = await supabase.from('clientes_leales').update({ puntos: points + 1 }).eq('usuario_ig', usuarioIg)
       if (!error) setPoints(prev => prev + 1)
     }
-    
-    alert(`🏆 ¡BOTA-NA ARCADE! \nGanaste: ${reward}\nMuestra este mensaje/screenshot para canjearlo.`)
+
+    if (prize.label === "Nada") {
+      alert("❌ Mala suerte, no ganaste nada esta vez.")
+    } else {
+      alert(`🎉 ¡GANASTE: ${prize.label}! \nMuestra este mensaje a Saúl o Aranza para canjearlo.`)
+    }
+
     setInputCode("")
     setView('card')
   }
@@ -142,140 +98,79 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/95 backdrop-blur-lg" onClick={onClose} />
       
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-2xl"
-      >
-        {/* HEADER */}
-        <div className="bg-[oklch(0.55_0.15_45)] p-6 text-white flex items-center justify-between">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-2xl">
+        {/* HEADER LIMPIO */}
+        <div className="bg-zinc-900 p-6 text-white flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-2">
-            <Wallet className="h-5 w-5" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">BotaCard v2.0</span>
+            <Wallet className="h-4 w-4 text-[oklch(0.55_0.15_45)]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">BotaCard</span>
           </div>
-          <button onClick={onClose} className="rounded-full bg-black/20 p-2 hover:bg-black/40 transition-all">
-            <X className="h-5 w-5" />
-          </button>
+          <button onClick={onClose} className="rounded-full bg-white/5 p-2 hover:bg-white/10 transition-all"><X className="h-4 w-4" /></button>
         </div>
 
-        {/* CONTENEDOR DE ALTURA FIJA */}
         <div className="h-[520px] p-8 flex flex-col justify-center overflow-y-auto no-scrollbar">
           <AnimatePresence mode="wait">
 
             {view === 'login' && (
-              <motion.div key="login" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-center space-y-8">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-500 to-red-600 shadow-xl">
-                  <Instagram className="h-8 w-8 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Tu BOTA-Card</h2>
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Ingresa tu Instagram para empezar</p>
-                </div>
-                <div className="space-y-3">
-                  <input type="text" placeholder="@usuario" value={usuarioIg} onChange={(e) => setUsuarioIg(e.target.value)}
-                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-4 text-center text-white font-bold focus:border-[oklch(0.55_0.15_45)] outline-none" />
-                  <button onClick={() => fetchUserData(usuarioIg)} disabled={isLoading} className="w-full rounded-2xl bg-white py-4 font-black uppercase text-black active:scale-95 transition-all">
-                    {isLoading ? <Loader2 className="animate-spin mx-auto" /> : "ENTRAR"}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {view === 'verify' && (
-              <motion.div key="verify" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-6">
-                <div className="space-y-2">
-                  <h2 className="text-xl font-black text-white uppercase italic">Activa tu tarjeta</h2>
-                  <p className="text-sm text-zinc-500">Hola @{usuarioIg}, síguenos para validar tu cuenta.</p>
-                </div>
-                <a href="https://instagram.com/bota.na.mx" target="_blank" onClick={() => setHasClickedInstagram(true)}
-                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white/5 border border-white/10 py-4 font-black text-white">
-                  <Instagram className="h-5 w-5 text-pink-500" /> @BOTA.NA.MX
-                </a>
-                <button onClick={async () => {
-                  if (!hasClickedInstagram) return;
-                  setIsLoading(true);
-                  await supabase.from('clientes_leales').update({ is_verified: true }).eq('usuario_ig', usuarioIg);
-                  setIsVerified(true); setView('card'); setIsLoading(false);
-                }} disabled={!hasClickedInstagram} className={`w-full rounded-2xl py-4 font-black text-white transition-all ${hasClickedInstagram ? "bg-orange-600" : "bg-zinc-800 opacity-20"}`}>
-                  YA LOS SIGO, ACTIVAR
-                </button>
+              <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-8">
+                <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Acceso</h2>
+                <input type="text" placeholder="@tu_usuario_ig" value={usuarioIg} onChange={(e) => setUsuarioIg(e.target.value)} className="w-full rounded-2xl bg-white/5 border border-white/10 py-4 text-center text-white font-bold outline-none" />
+                <button onClick={() => fetchUserData(usuarioIg)} disabled={isLoading} className="w-full rounded-2xl bg-white py-4 font-black text-black">ENTRAR</button>
               </motion.div>
             )}
 
             {view === 'card' && (
               <motion.div key="card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="text-center">
-                  <p className="text-[10px] font-black text-[oklch(0.55_0.15_45)] uppercase tracking-widest">@{usuarioIg}</p>
-                  <h3 className="text-lg font-black text-white uppercase italic tracking-tighter">Mis Puntos</h3>
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">@{usuarioIg}</p>
+                  <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Tarjeta de Lealtad</h3>
                 </div>
-                
-                <div className="grid grid-cols-5 gap-3 bg-white/5 p-4 rounded-[2rem] border border-white/5">
+                <div className="grid grid-cols-5 gap-3 bg-white/5 p-4 rounded-3xl border border-white/5">
                   {[...Array(10)].map((_, i) => (
-                    <div key={i} className={`aspect-square rounded-full flex items-center justify-center transition-all duration-700 ${i < points ? "bg-[oklch(0.55_0.15_45)] shadow-[0_0_15px_rgba(194,65,12,0.3)]" : "bg-zinc-900 border border-white/5"}`}>
+                    <div key={i} className={`aspect-square rounded-full flex items-center justify-center transition-all duration-700 ${i < points ? "bg-[oklch(0.55_0.15_45)]" : "bg-zinc-900 border border-white/10"}`}>
                       {i < points ? <Check className="h-4 w-4 text-white stroke-[4px]" /> : <span className="text-[9px] font-bold text-zinc-800">{i + 1}</span>}
                     </div>
                   ))}
                 </div>
-
-                <div className="space-y-3 pt-2">
-                  <div className="relative">
-                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
-                    <input type="text" placeholder="BOTA-XXXX" value={inputCode} onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                      className="w-full rounded-2xl bg-white/5 border border-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white outline-none focus:border-[oklch(0.55_0.15_45)]" />
-                  </div>
-                  <button onClick={handleValidateCode} disabled={isLoading || points >= 10} className="w-full rounded-2xl bg-white py-4 font-black uppercase text-black active:scale-95 shadow-xl">
-                    {isLoading ? <Loader2 className="animate-spin mx-auto" /> : "CANJEAR CÓDIGO"}
-                  </button>
-                  {statusMsg.text && <p className={`text-center text-[10px] font-bold uppercase ${statusMsg.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>{statusMsg.text}</p>}
+                <div className="space-y-3 pt-4">
+                  <input type="text" placeholder="CÓDIGO DE COMPRA" value={inputCode} onChange={(e) => setInputCode(e.target.value.toUpperCase())} className="w-full rounded-2xl bg-white/5 border border-white/10 py-4 text-center text-sm font-bold text-white outline-none" />
+                  <button onClick={handleValidateCode} disabled={isLoading || points >= 10} className="w-full rounded-2xl bg-white py-4 font-black text-black shadow-xl uppercase">CANJEAR</button>
+                  {statusMsg.text && <p className="text-center text-[10px] font-bold uppercase text-red-500">{statusMsg.text}</p>}
                 </div>
-
-                {points >= 10 && (
-                   <button onClick={() => window.open(`https://wa.me/524774950232?text=Llené mi BOTA-Card @${usuarioIg}`)} className="w-full bg-green-600 py-4 rounded-2xl font-black text-white uppercase text-xs">Reclamar Premio WhatsApp</button>
-                )}
               </motion.div>
             )}
 
             {view === 'decision' && (
-              <motion.div key="decision" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 text-center">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">¡Código <span className="text-[oklch(0.55_0.15_45)]">Válido</span>!</h3>
-                  <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">¿Qué prefieres hacer con tu ficha?</p>
+              <motion.div key="decision" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-8 text-center">
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter italic">¿Te la <span className="text-[oklch(0.55_0.15_45)]">juegas</span>?</h3>
+                  <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Elige tu camino. Solo tienes una oportunidad.</p>
                 </div>
                 <div className="grid gap-4">
-                  <button onClick={handleSecurePoint} className="flex items-center justify-between p-6 bg-zinc-900 rounded-[2rem] border border-white/5 text-left group active:scale-95 transition-all">
-                    <div>
-                      <h4 className="text-white font-black uppercase italic">Asegurar Punto</h4>
-                      <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter">+1 Punto directo</p>
-                    </div>
-                    <Trophy className="h-8 w-8 text-zinc-800 group-hover:text-white transition-colors" />
+                  <button onClick={handleSecurePoint} className="flex items-center justify-between p-6 bg-zinc-900 rounded-[2rem] border border-white/5 text-left group">
+                    <div><h4 className="text-white font-black uppercase italic">Punto Seguro</h4><p className="text-[9px] text-zinc-600 font-bold">+1 PUNTO A TU TARJETA</p></div>
+                    <Trophy className="h-8 w-8 text-zinc-800 group-hover:text-white" />
                   </button>
-                  <button onClick={() => setView('arcade')} className="flex items-center justify-between p-6 bg-white rounded-[2rem] text-left group active:scale-95 transition-all relative overflow-hidden">
-                    <div className="relative z-10">
-                      <h4 className="text-black font-black uppercase italic">BotaArcade</h4>
-                      <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-tighter">Juega por premios mayores</p>
-                    </div>
-                    <Gamepad2 className="h-8 w-8 text-black/20 group-hover:text-black transition-colors relative z-10" />
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-[oklch(0.55_0.15_45)] blur-[40px] opacity-20" />
+                  <button onClick={() => setView('roulette')} className="flex items-center justify-between p-6 bg-white rounded-[2rem] text-left group overflow-hidden relative">
+                    <div className="relative z-10"><h4 className="text-black font-black uppercase italic">Ruleta de la Suerte</h4><p className="text-[9px] text-zinc-400 font-bold uppercase">Gana snacks gratis o descuentos</p></div>
+                    <Gamepad2 className="h-8 w-8 text-black/10 group-hover:text-black relative z-10" />
                   </button>
                 </div>
               </motion.div>
             )}
 
-            {view === 'arcade' && (
-              <motion.div key="arcade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
-                <BotaArcade 
-                  onReward={handleArcadeReward} 
-                  onCancel={() => setView('decision')} 
-                />
+            {view === 'roulette' && (
+              <motion.div key="roulette" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <BotaRoulette onFinish={handleRouletteFinish} />
               </motion.div>
             )}
 
           </AnimatePresence>
         </div>
-
-        <div className="p-4 bg-black/40 text-center border-t border-white/5">
-           <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em]">Industrial Snacks León • GTO</p>
+        <div className="p-4 bg-black text-center border-t border-white/5 opacity-40">
+           <p className="text-[8px] font-black uppercase tracking-[0.5em]">BOTA-NA Industrial Snacks</p>
         </div>
       </motion.div>
     </div>
