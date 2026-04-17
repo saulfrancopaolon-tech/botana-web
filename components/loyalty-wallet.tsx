@@ -19,7 +19,7 @@ export function LoyaltyWallet({ isOpen, onClose }: LoyaltyWalletProps) {
   const [isVerified, setIsVerified] = useState(false)
   const [hasClickedInstagram, setHasClickedInstagram] = useState(false)
 
-  const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbxglhcx_4-m8GXWBawpdymV9Vo5QtSzdYnmq4042JE_pV4m1IaHVyzTO9YkFPEfyazvdQ/exec"
+  const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwf8QjtB996ZjFQEpAkR6au-AmakyMEV4SDzEPefW5KGY7beCQd_CpigmgTD6S-w7qCwA/exec"
 
   // Recuperar sesión al abrir
   useEffect(() => {
